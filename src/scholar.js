@@ -1,39 +1,123 @@
 const { Builder, By, Key, until } = require('selenium-webdriver');
+const { k } = require('./base')
+const { sleep } = require('./robot')
 
-async function search(query, from=0) {
-  // TODO: Move driver outside?
-  let driver = await new Builder().forBrowser('safari').build();
+const SEARCH_BOX_ID = '#gs_hdr_tsi'
+const SEARCH_BTN_ID = '#gs_hdr_tsb'
+const NEXT_BTN = '.gs_btnPR'
+const PREV_BTN = '.gs_btnPL'
 
-  let urlencoded = query.replace(/ /g, '%20');
-  let query_url = `http://scholar.google.com/scholar?q=${urlencoded}&from=${from}`
-
-  await driver.get(query_url);
-  //await driver.wait(until.elementsLocated(By.css('h3 a')));
-
-  let hits = await driver.findElements(By.css('.gs_ri'));
-  let titles = await Promise.all(hits.map(async function(hit) {
-    return {
-      title:   (await hit.findElement(By.css('h3 a')).getText()),
-      url:     (await hit.findElement(By.css('h3 a')).getAttribute('href')),
-      about:   (await hit.findElement(By.css('.gs_rs')).getText()),
-      authors: (await hit.findElement(By.css('.gs_a')).getText()),
-      accessed: new Date(),
-    }
-  }));
-  driver.quit();
-  return titles;
-};
-
-// TODO: Generalize
-async function collect(query) {
-  let p1 = await search(query, 0);
-  let p2 = await search(query, 10);
-  let p3 = await search(query, 20);
-  return [...p1, ...p2, ...p3];
+async function captcha (driver) {
+  const text = await driver.findElement(By.css('body')).getText()
+  if (text.indexOf('unusual traffic') != -1) {
+    console.log('Robot: Blocked by CAPTCHA. Please solve manually.')
+    // TODO: Not sure scholar always send us back to where we were!
+    await driver.wait(until.elementLocated(By.css(SEARCH_BOX_ID)))
+    console.log('Robot: CAPTCHA solved.')
+    await sleep()
+  }
 }
 
-// Fake
-const collect2 = x => {
+async function makeSearch (driver, query) {
+
+  // Open scholar
+  await driver.findElement(By.css(SEARCH_BOX_ID))
+    .then(() => {
+      console.log('Robot: Found search box.')
+    })
+    .catch(async function() {
+      console.log('Robot: Please guide your browser to Google Scholar (this helps us avoid CAPTCHAs).')
+      await driver.wait(until.elementLocated(By.css(SEARCH_BOX_ID)))
+      console.log('Robot: Found search box.')
+      await sleep()
+    })
+
+  // CAPTCHA
+  await captcha(driver)
+
+  // Type search
+  console.log('Robot: Typing query.')
+  let searchbox = await driver.findElement(By.css(SEARCH_BOX_ID))
+  await searchbox.clear()
+  await searchbox.sendKeys(query)
+  console.log('Robot: Query typed.')
+  await sleep()
+
+  // Send search
+  console.log('Robot: Submitting query.')
+  let button = await driver.findElement(By.css(SEARCH_BTN_ID))
+  await button.click()
+  await sleep()
+}
+
+async function pageNum(driver) {
+  let url = await driver.getCurrentUrl()
+  return (url.match(/start=(\d+)/) || [,0])[1] / 10 + 1
+}
+
+async function crawlPage(driver, page) {
+  await captcha(driver)
+
+  // Check and change page number if necessary
+  let gpage = await pageNum(driver)
+  console.log(`Robot: At page ${gpage} while expecting ${page}`)
+  while (gpage != page) {
+    let css = gpage < page ? NEXT_BTN : PREV_BTN
+    let dir = gpage < page ? 'next' : 'previous'
+    console.log(`Robot: Moving to ${dir} page.`)
+    let btn = await driver.findElement(By.css(css))
+    await btn.click()
+    await sleep()
+    gpage = await pageNum(driver)
+    console.log(`Robot: At page ${gpage} while expecting ${page}`)
+  }
+
+  // Captcha check
+  await captcha(driver)
+
+  // Parse page
+  let hits = await driver.findElements(By.css('.gs_ri'));
+  console.log(`Robot: Collecting ${hits.length} hits`)
+  let titles = await Promise.all(hits.map(async function(hit) {
+    let query_url = await driver.getCurrentUrl()
+    let accessed  = new Date().toJSON()
+
+    let isCitation = await hit.findElement(By.css('.gs_ctu')).then(k(true)).catch(k(false))
+    if (isCitation) {
+      return {
+        title:   (await (await hit.findElements(By.css('h3 > span')))[1].getText()),
+        url:     (await (await hit.findElements(By.css('.gs_fl > a')))[2].getAttribute('href')),
+        about:   '',
+        authors: (await hit.findElement(By.css('.gs_a')).getText()),
+        query_url,
+        accessed,
+      }
+    } else {
+      return {
+        title:   (await hit.findElement(By.css('h3 a')).getText()),
+        url:     (await hit.findElement(By.css('h3 a')).getAttribute('href')),
+        about:   (await hit.findElement(By.css('.gs_rs')).getText()),
+        authors: (await hit.findElement(By.css('.gs_a')).getText()),
+        query_url,
+        accessed,
+      }
+    }
+  }));
+  return titles
+}
+
+// TODO: Generalize
+async function collect(driver, query) {
+  await makeSearch(driver, query)
+  return [
+    ...await crawlPage(driver, 1),
+    ...await crawlPage(driver, 2),
+    ...await crawlPage(driver, 3)
+  ]
+};
+
+// Testing fixture
+const collect_fixture = x => {
   return Promise.resolve([
     { title: 'foo1', url: 'http://whlkkgfjsgkjhasfgd.com' },
     { title: 'foo2', url: 'http://whkgfjsagkjhasfgd.com' },
@@ -43,6 +127,5 @@ const collect2 = x => {
 }
 
 module.exports = {
-  search,
   collect,
 };

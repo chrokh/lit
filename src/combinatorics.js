@@ -29,5 +29,7 @@ const combine = pipe(
   map(join(' ')))
 
 module.exports = {
-  permutations, cartesian, combine
+  permutations,
+  cartesian,
+  combine
 };

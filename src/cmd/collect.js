@@ -1,24 +1,16 @@
 const Comb = require('../combinatorics')
 const { all, len, setAll } = require('../entity')
-const { pipe, map, prop, uniq, filter, includes, assoc, dissoc, merge, k } = require('../base')
+const { pipe, map, prop, assoc, dissoc, merge, k } = require('../base')
 const { collect } = require('../scholar')
 const { open, close, sleep } = require('../robot')
 const { keyify, hash } = require('../keyify')
+const { completedQueries, remainingQueries } = require('../vm/collect')
 const prompt = require('../prompt')
 
 async function main() {
 
-  const completedQs = pipe(
-    Object.values,
-    map(prop('query')),
-    uniq,
-  )(all('version'))
-
-  const remainingQs = pipe(
-    Object.values,
-    filter(x => !includes(x.id)(completedQs))
-  )(all('query'))
-
+  const completedQs = completedQueries()
+  const remainingQs = remainingQueries()
   const allQs = Object.values(all('query'))
 
   console.log(`Completed queries: ${completedQs.length}`)

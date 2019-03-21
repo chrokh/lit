@@ -39,6 +39,9 @@ COMMANDS
   lit init
     Initialize new review in current dir.
 
+  lit status
+    Show information about current lit review.
+
   lit feed [file]
     Feed current review with phrase sets.
 

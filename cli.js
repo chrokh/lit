@@ -10,6 +10,11 @@ async function index () {
       require('./src/cmd/init')
       return
 
+    case 'status':
+    case 's':
+      require('./src/cmd/status')
+      return
+
     case 'feed':
     case 'f':
       require('./src/cmd/feed')
@@ -34,6 +39,9 @@ SYNOPSIS
 COMMANDS
   lit init
     Initialize new review in current dir.
+
+  lit status
+    Show information about current lit review.
 
   lit feed [file]
     Feed current review with phrase sets.

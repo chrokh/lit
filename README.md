@@ -21,7 +21,7 @@ Instabilities and bugs should be expected. This is an early-stage project.
 
 ## Pre-requisites
 
-We use `geckodriver` for [Selenium](https://www.seleniumhq.org/) which means that you must have both [Firefox](https://www.mozilla.org/firefox/) and geckodriver installed. Note that geckodriver must be available in your `PATH`. While `geckodriver` is available on the [download page](https://www.seleniumhq.org/download/) on the Selenium website you can usually also install it using your platforms package manager (such as e.g. [Homebrew](https://brew.sh/) for Mac OS).
+We use `geckodriver` for [Selenium](https://www.seleniumhq.org/) which means that you must have both [Firefox](https://www.mozilla.org/firefox/) and geckodriver installed. Note that geckodriver must be available in your `PATH`. While `geckodriver` is available on the [download page](https://www.seleniumhq.org/download/) on the Selenium website you can usually also install it using your platform's package manager (such as e.g. [Homebrew](https://brew.sh/) for Mac OS).
 
 
 ## Installation

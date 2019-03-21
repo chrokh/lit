@@ -27,7 +27,26 @@ async function index () {
 
     case '--help':
     case 'help':
-      console.log('lit: Documentation coming soon.')
+      console.log(`
+SYNOPSIS
+  lit <command> [<args>]
+
+COMMANDS
+  lit init
+    Initialize new review in current dir.
+
+  lit feed [file]
+    Feed current review with phrase sets.
+
+  lit expand
+    Expand phrase sets into queries.
+
+  lit collect
+    Execute queries and collect results.
+
+  lit help
+    This screen.
+      `)
       return
 
     default:

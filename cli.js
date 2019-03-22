@@ -32,6 +32,7 @@ async function index () {
 
     case '--help':
     case 'help':
+    case undefined:
       console.log(`
 SYNOPSIS
   lit <command> [<args>]
@@ -58,7 +59,7 @@ COMMANDS
       return
 
     default:
-      console.log(`lit: ${cmd} is not a command. See 'lit --help'`)
+      console.log(`lit: '${cmd}' is not a command. See 'lit --help'`)
 
   }
 }

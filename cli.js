@@ -33,8 +33,7 @@ async function index () {
     case '--help':
     case 'help':
     case undefined:
-      console.log(`
-SYNOPSIS
+      console.log(`SYNOPSIS
   lit <command> [<args>]
 
 COMMANDS
@@ -54,8 +53,7 @@ COMMANDS
     Execute queries and collect results.
 
   lit help
-    This screen.
-      `)
+    This screen.`)
       return
 
     default:

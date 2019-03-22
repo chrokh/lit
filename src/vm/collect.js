@@ -4,9 +4,9 @@ const { all } = require('../entity')
 const completedQueries = () =>
   pipe(
     Object.values,
-    map(prop('query')),
+    map(prop('queryId')),
     uniq,
-  )(all('observation'))
+  )(all('sweep'))
 
 const remainingQueries = () =>
   pipe(

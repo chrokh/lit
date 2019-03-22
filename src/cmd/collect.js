@@ -1,9 +1,9 @@
 const Comb = require('../combinatorics')
 const { all, len, setAll } = require('../entity')
-const { pipe, map, prop, assoc, dissoc, merge, k } = require('../base')
+const { map, merge, k } = require('../base')
 const { collect } = require('../scholar')
 const { open, close, sleep } = require('../robot')
-const { keyify, hash } = require('../keyify')
+const { md5, toRecords, toRecord } = require('../keyify')
 const { completedQueries, remainingQueries } = require('../vm/collect')
 const prompt = require('../prompt')
 
@@ -33,48 +33,54 @@ interact with the robot to deal with CAPTCHAs.
 
     for (let query of remainingQs) {
 
+      // Build sweep record
+      const sweepId = md5(query.id + new Date().toJSON())
+      let sweep = {
+        id: sweepId,
+        queryId: query.id,
+        started: new Date().toJSON(),
+      }
+
       // Collect articles
       const qs = query.query
       console.log(`Finding documents matching: "${qs}"`)
-      let hits = await collect(driver, qs).
-        then(pipe(
-          map(assoc('query')(query.id)),
-        ))
+      let hits = await collect(driver, qs)
       console.log(`Found ${Object.keys(hits).length} documents.`)
 
-      // For consistency
-      const docKeyer = prop('url')
-      const verKeyer = x => x.document + query.id
+      // Build documents
+      const documents = hits.map(hit => ({
+        id:  md5(hit.url),
+        url: hit.url,
+      }))
 
-      // Extract documents
-      const docs = pipe(
-        map(x => ({
-          url:      x.url,
-        })),
-        keyify(docKeyer),
-      )(hits)
+      // Build observations
+      const observations = hits.map(hit => ({
+        id:         md5(hit.url + sweepId + new Date().toJSON()),
+        documentId: md5(hit.url),
+        sweepId,
+        ...hit,
+      }))
 
-      // Extract observations
-      const vers = pipe(
-        map(x => ({ ...x, document: hash(docKeyer)(x) })),
-        keyify(verKeyer),
-      )(hits)
+      // Update sweep with end-timestamp
+      sweep = { ...sweep, ended: (new Date().toJSON()) }
 
       // Insert into db
+      const oldSweeps = all('sweep')
       const oldDocs = all('document')
-      const oldVers = all('observation')
-      const mergedDocs = merge(k)(docs)(oldDocs)
-      const mergedVers = merge(k)(vers)(oldVers)
+      const oldObs = all('observation')
+      const mergedSweeps = merge(k)(toRecord(sweep))(oldSweeps)
+      const mergedDocs = merge(k)(toRecords(documents))(oldDocs)
+      const mergedObs = merge(k)(toRecords(observations))(oldObs)
+      setAll('sweep')(mergedSweeps)
       setAll('document')(mergedDocs)
-      setAll('observation')(mergedVers)
+      setAll('observation')(mergedObs)
 
       // Print info
       const docDiff = Object.keys(mergedDocs).length - Object.keys(oldDocs).length
-      const verDiff = Object.keys(mergedVers).length - Object.keys(oldVers).length
-      const docDups = Object.keys(docs).length - docDiff
-      const verDups = Object.keys(vers).length - verDiff
-      console.log(`Added ${docDiff} seemingly new documents (skipped ${docDups} duplicates).`)
-      console.log(`Added ${verDiff} possibly new observations (skipped ${verDups} duplicates).`)
+      const docDups = documents.length - docDiff
+      console.log('Sweep summary:')
+      console.log(`  Added ${docDiff} seemingly new documents (skipped ${docDups} known documents).`)
+      console.log(`  Added ${observations.length} observations.`)
 
       // Sleep before next
       await sleep(10, 20)

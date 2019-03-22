@@ -48,7 +48,10 @@ interact with the robot to deal with CAPTCHAs.
 
       // Extract documents
       const docs = pipe(
-        map(x => ({ url: x.url })),
+        map(x => ({
+          url:      x.url,
+          citation: x.citation, // TODO: Assuming that citation is consistent
+        })),
         keyify(docKeyer),
       )(hits)
 
@@ -56,6 +59,7 @@ interact with the robot to deal with CAPTCHAs.
       const vers = pipe(
         map(x => ({ ...x, document: hash(docKeyer)(x) })),
         map(dissoc('url')),
+        map(dissoc('citation')),
         keyify(verKeyer),
       )(hits)
 

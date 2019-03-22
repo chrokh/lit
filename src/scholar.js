@@ -6,6 +6,83 @@ const SEARCH_BOX_ID = '#gs_hdr_tsi'
 const SEARCH_BTN_ID = '#gs_hdr_tsb'
 const NEXT_BTN = '.gs_btnPR'
 const PREV_BTN = '.gs_btnPL'
+const RESULTS = '#gs_res_ccl_mid .gs_r.gs_or'
+
+async function openCiteModal(result) {
+  const links = await result.findElements(By.css('.gs_fl > a'))
+  await links[1].click()
+}
+
+async function closeCiteModal(driver) {
+  const link = await driver.findElement(By.css('#gs_cit-x'))
+  await link.click()
+}
+
+async function clickBibtexInModal(driver) {
+  const links = await driver.findElements(By.css('.gs_citi'))
+  await links[0].click()
+}
+
+async function grabBibtexString(driver) {
+  const pre = await driver.findElement(By.css('pre'))
+  return await pre.getText()
+}
+
+async function collectCitation(result) {
+  let driver = result.getDriver()
+  console.log('Robot: Opening citation modal.')
+  await openCiteModal(result)
+  await sleep()
+  console.log('Robot: Clicking bibtex.')
+  await clickBibtexInModal(driver)
+  await sleep()
+  console.log('Robot: Copying citation.')
+  let citation = await grabBibtexString(driver)
+  await sleep()
+  console.log('Robot: Navigating back to results list.')
+  await driver.navigate().back()
+  await sleep()
+  console.log('Robot: Closing citation modal.')
+  await closeCiteModal(driver)
+  await sleep()
+  return citation
+}
+
+async function collectHit(hit) {
+  // Check if it's a citation hit or not
+  let entry = await hit.findElement(By.css('.gs_ctu')) // is citation?
+    .then(_ => collectCitationHit(hit))
+    .catch(_ => collectNormalHit(hit))
+
+  // Grab bibtext citation
+  let citation = await collectCitation(hit)
+
+  // Compute additional info
+  let query_url = await hit.getDriver().getCurrentUrl()
+  let accessed  = new Date().toJSON()
+
+  // Merge and return
+  return Object.assign(entry, { citation, query_url, accessed })
+}
+
+async function collectCitationHit(hit) {
+  return {
+    title:   (await (await hit.findElements(By.css('h3 > span')))[1].getText()),
+    url:     (await (await hit.findElements(By.css('.gs_fl > a')))[2].getAttribute('href')),
+    about:   '',
+    authors: (await hit.findElement(By.css('.gs_a')).getText()),
+  }
+}
+
+async function collectNormalHit(hit) {
+  return {
+    title:   (await hit.findElement(By.css('h3 a')).getText()),
+    url:     (await hit.findElement(By.css('h3 a')).getAttribute('href')),
+    about:   (await hit.findElement(By.css('.gs_rs')).getText()),
+    authors: (await hit.findElement(By.css('.gs_a')).getText()),
+  }
+}
+
 
 async function captcha (driver) {
   const text = await driver.findElement(By.css('body')).getText()
@@ -76,34 +153,20 @@ async function crawlPage(driver, page) {
   await captcha(driver)
 
   // Parse page
-  let hits = await driver.findElements(By.css('.gs_ri'));
-  console.log(`Robot: Collecting ${hits.length} hits`)
-  let titles = await Promise.all(hits.map(async function(hit) {
-    let query_url = await driver.getCurrentUrl()
-    let accessed  = new Date().toJSON()
+  let numHits = (await readHits(driver)).length
+  console.log(`Robot: Collecting ${numHits} hits`)
 
-    let isCitation = await hit.findElement(By.css('.gs_ctu')).then(k(true)).catch(k(false))
-    if (isCitation) {
-      return {
-        title:   (await (await hit.findElements(By.css('h3 > span')))[1].getText()),
-        url:     (await (await hit.findElements(By.css('.gs_fl > a')))[2].getAttribute('href')),
-        about:   '',
-        authors: (await hit.findElement(By.css('.gs_a')).getText()),
-        query_url,
-        accessed,
-      }
-    } else {
-      return {
-        title:   (await hit.findElement(By.css('h3 a')).getText()),
-        url:     (await hit.findElement(By.css('h3 a')).getAttribute('href')),
-        about:   (await hit.findElement(By.css('.gs_rs')).getText()),
-        authors: (await hit.findElement(By.css('.gs_a')).getText()),
-        query_url,
-        accessed,
-      }
-    }
-  }));
+  let titles = []
+  for (let n=0; n<numHits; n++) {
+    let hit = (await readHits(driver))[n]
+    titles.push(await collectHit(hit))
+  }
+
   return titles
+}
+
+async function readHits(driver) {
+  return await driver.findElements(By.css(RESULTS))
 }
 
 // TODO: Generalize

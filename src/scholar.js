@@ -95,21 +95,37 @@ async function captcha (driver) {
   }
 }
 
+async function openScholarManually (driver) {
+  console.log('Robot: Probably stopped by CAPTCHAS.')
+  console.log('Robot: Please manually navigate to Google Scholar.')
+  console.log('(waiting)')
+  await driver.wait(until.elementLocated(By.css(SEARCH_BOX_ID)))
+}
+
+async function openScholarAutomatically (driver) {
+  console.log('Robot: Opening scholar.google.com.')
+  await driver.get('http://scholar.google.com')
+  await sleep()
+  console.log('Robot: Trying to find search box.')
+  await driver.wait(until.elementLocated(By.css(SEARCH_BOX_ID)), 5000)
+}
+
+async function openScholar (driver) {
+  try {
+    await driver.findElement(By.css(SEARCH_BOX_ID)) // already there?
+  } catch(e) {
+    try {
+      await openScholarAutomatically(driver)
+    } catch(e) {
+      await openScholarManually(driver)
+    }
+  } finally {
+    console.log('Robot: Found search box.')
+  }
+  await sleep()
+}
+
 async function makeSearch (driver, query) {
-
-  // Open scholar
-  await driver.findElement(By.css(SEARCH_BOX_ID))
-    .then(() => {
-      console.log('Robot: Found search box.')
-    })
-    .catch(async function() {
-      console.log('Robot: Please guide your browser to Google Scholar (this helps us avoid CAPTCHAs).')
-      await driver.wait(until.elementLocated(By.css(SEARCH_BOX_ID)))
-      console.log('Robot: Found search box.')
-      await sleep()
-    })
-
-  // CAPTCHA
   await captcha(driver)
 
   // Type search
@@ -171,6 +187,7 @@ async function readHits(driver) {
 
 // TODO: Generalize
 async function collect(driver, query) {
+  await openScholar(driver)
   await makeSearch(driver, query)
   return [
     ...await crawlPage(driver, 1),

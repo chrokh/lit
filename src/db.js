@@ -16,8 +16,9 @@ const init = () => {
   fs.writeFileSync(`${BASE}/phrase.json`, '{}', 'UTF-8')
   fs.writeFileSync(`${BASE}/set.json`, '{}', 'UTF-8')
   fs.writeFileSync(`${BASE}/query.json`, '{}', 'UTF-8')
+  fs.writeFileSync(`${BASE}/sweep.json`, '{}', 'UTF-8')
   fs.writeFileSync(`${BASE}/document.json`, '{}', 'UTF-8')
-  fs.writeFileSync(`${BASE}/version.json`, '{}', 'UTF-8')
+  fs.writeFileSync(`${BASE}/observation.json`, '{}', 'UTF-8')
   return BASE
 }
 

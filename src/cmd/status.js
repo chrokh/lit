@@ -11,12 +11,12 @@ if (!db.exists()) {
 const len = os => Object.keys(os).length
 
 // Collect data
-const phrases   = all('phrase')
-const sets      = all('set')
-const queries   = all('query')
-const versions  = all('version')
-const documents = all('document')
-const comQs = completedQueries()
+const phrases      = all('phrase')
+const sets         = all('set')
+const queries      = all('query')
+const observations = all('observation')
+const documents    = all('document')
+const comQs        = completedQueries()
 
 
 // Print input info
@@ -40,7 +40,7 @@ if (len(documents) == 0) {
 }
 console.log('Collection status:')
 console.log(`  ${comQs.length} queries of ${len(queries)} completed (${Math.round(comQs.length / len(queries) * 100)} %)`)
-console.log(`  ${len(documents)} unique documents (${len(versions)} hits)`)
+console.log(`  ${len(documents)} unique documents (${len(observations)} hits)`)
 console.log()
 
 

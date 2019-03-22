@@ -50,26 +50,23 @@ interact with the robot to deal with CAPTCHAs.
       const docs = pipe(
         map(x => ({
           url:      x.url,
-          citation: x.citation, // TODO: Assuming that citation is consistent
         })),
         keyify(docKeyer),
       )(hits)
 
-      // Extract versions
+      // Extract observations
       const vers = pipe(
         map(x => ({ ...x, document: hash(docKeyer)(x) })),
-        map(dissoc('url')),
-        map(dissoc('citation')),
         keyify(verKeyer),
       )(hits)
 
       // Insert into db
       const oldDocs = all('document')
-      const oldVers = all('version')
+      const oldVers = all('observation')
       const mergedDocs = merge(k)(docs)(oldDocs)
       const mergedVers = merge(k)(vers)(oldVers)
       setAll('document')(mergedDocs)
-      setAll('version')(mergedVers)
+      setAll('observation')(mergedVers)
 
       // Print info
       const docDiff = Object.keys(mergedDocs).length - Object.keys(oldDocs).length
@@ -77,7 +74,7 @@ interact with the robot to deal with CAPTCHAs.
       const docDups = Object.keys(docs).length - docDiff
       const verDups = Object.keys(vers).length - verDiff
       console.log(`Added ${docDiff} seemingly new documents (skipped ${docDups} duplicates).`)
-      console.log(`Added ${verDiff} possibly new versions (skipped ${verDups} duplicates).`)
+      console.log(`Added ${verDiff} possibly new observations (skipped ${verDups} duplicates).`)
 
       // Sleep before next
       await sleep(10, 20)

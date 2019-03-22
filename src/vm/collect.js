@@ -6,7 +6,7 @@ const completedQueries = () =>
     Object.values,
     map(prop('query')),
     uniq,
-  )(all('version'))
+  )(all('observation'))
 
 const remainingQueries = () =>
   pipe(

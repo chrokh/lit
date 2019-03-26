@@ -1,6 +1,7 @@
 const k = x => _ => x
 const pipe = (...fs) => x => fs.reduce((acc, f) => f(acc), x)
 const map = f => xs => xs.map(f)
+const len = xs => xs.length
 const join = s => xs => xs.join(s)
 const flat = n => xs => xs.flat(n)
 const id = x => x
@@ -9,10 +10,14 @@ const includes = x => xs => xs.indexOf(x) != -1
 const filter = f => xs => xs.filter(f)
 const assign = o1 => o2 => Object.assign({}, o2, o1)
 const reduce = f => z => xs => xs.reduce((acc, x) => f(acc)(x), z)
+const max = x => y => x > y ? x : y
 const prop = k => o => o[k]
 const assoc = k => v => o => Object.assign({}, o, { [k]: v })
 const dissoc = k => o => { let x = Object.assign({}, o); delete x[k]; return x; }
 const uniq = xs => [...new Set(xs)]
+const rpad = n => s => (s.length > n
+  ? s.substring(n-2) + '..'
+  : s + ' '.repeat(n - s.length))
 const arrEq = xs => ys => ( // TODO: deprecate in favor of (deep) equals
   xs.map((x, i) => x == ys[i]).reduce((acc, b) => acc && b, true) &&
   ys.map((y, i) => y == xs[i]).reduce((acc, b) => acc && b, true) )
@@ -48,6 +53,23 @@ const merge = f => x => y => {
     return f(x)(y)
   }
 }
+const transpose = xs => {
+  let i = 0;
+  let result = [];
+  while (i < xs.length) {
+    let innerlist = xs[i];
+    let j = 0;
+    while (j < innerlist.length) {
+      if (typeof result[j] === 'undefined') {
+        result[j] = [];
+      }
+      result[j].push(innerlist[j]);
+      j += 1;
+    }
+    i += 1;
+  }
+  return result;
+}
 
 module.exports = {
   pipe,
@@ -59,6 +81,7 @@ module.exports = {
   filter,
   merge,
   reduce,
+  max,
   prop,
   assoc,
   dissoc,
@@ -68,4 +91,7 @@ module.exports = {
   k,
   arrEq,
   includes,
+  rpad,
+  len,
+  transpose,
 }

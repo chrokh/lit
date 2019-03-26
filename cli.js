@@ -15,6 +15,11 @@ async function index () {
       require('./src/cmd/status')
       return
 
+    case 'list':
+    case 'ls':
+      require('./src/cmd/list')
+      return
+
     case 'feed':
     case 'f':
       require('./src/cmd/feed')
@@ -33,7 +38,7 @@ async function index () {
     case '--help':
     case 'help':
     case undefined:
-      console.log(`SYNOPSIS
+      console.log(`USAGE
   lit <command> [<args>]
 
 COMMANDS
@@ -42,6 +47,12 @@ COMMANDS
 
   lit status
     Show information about current lit review.
+
+  lit list <phrases|sets|queries|docs> [--plain|--pretty]
+    Lists inserted phrase or sets, generated queries, or collected documents.
+    Use --plain to avoid listing related data.
+    Default: --pretty.
+    Alias: ls
 
   lit feed [file]
     Feed current review with phrase sets.
@@ -53,11 +64,11 @@ COMMANDS
     Execute queries and collect results.
 
   lit help
-    This screen.`)
-      return
+  This screen.`)
+return
 
-    default:
-      console.log(`lit: '${cmd}' is not a command. See 'lit --help'`)
+default:
+console.log(`lit: '${cmd}' is not a command. See 'lit --help'`)
 
   }
 }

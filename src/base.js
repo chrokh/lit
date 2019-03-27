@@ -1,11 +1,13 @@
 const k = x => _ => x
 const pipe = (...fs) => x => fs.reduce((acc, f) => f(acc), x)
 const map = f => xs => xs.map(f)
+const add = x => y => x + y
 const len = xs => xs.length
 const join = s => xs => xs.join(s)
 const flat = n => xs => xs.flat(n)
 const id = x => x
 const trim = x => x.trim()
+const insert = x => xs => [x, ...xs]
 const includes = x => xs => xs.indexOf(x) != -1
 const filter = f => xs => xs.filter(f)
 const assign = o1 => o2 => Object.assign({}, o2, o1)
@@ -15,8 +17,11 @@ const prop = k => o => o[k]
 const assoc = k => v => o => Object.assign({}, o, { [k]: v })
 const dissoc = k => o => { let x = Object.assign({}, o); delete x[k]; return x; }
 const uniq = xs => [...new Set(xs)]
+const fill = value => start => end => xs => xs.fill(value, start, end)
+const padArrR = x => end => xs =>
+  [...xs, ...Array(end - xs.length).fill(x)]
 const rpad = n => s => (s.length > n
-  ? s.substring(n-2) + '..'
+  ? s.substring(n-2) + '..' // TODO: Clamping should be extracted
   : s + ' '.repeat(n - s.length))
 const arrEq = xs => ys => ( // TODO: deprecate in favor of (deep) equals
   xs.map((x, i) => x == ys[i]).reduce((acc, b) => acc && b, true) &&
@@ -74,6 +79,7 @@ const transpose = xs => {
 module.exports = {
   pipe,
   map,
+  add,
   join,
   flat,
   id,
@@ -90,7 +96,10 @@ module.exports = {
   filterObj,
   k,
   arrEq,
+  insert,
   includes,
+  fill,
+  padArrR,
   rpad,
   len,
   transpose,

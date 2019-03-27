@@ -2,7 +2,7 @@ const crypto = require('crypto');
 const { pipe, map, merge, reduce, k } = require('./base');
 const { prop } = require('./base')
 
-const md5 = str => crypto.createHash('md5').update(str).digest('hex')
+const md5 = str => crypto.createHash('md5').update(str.toString()).digest('hex')
 
 const hash = f => x => md5(f(x))
 

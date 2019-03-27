@@ -48,13 +48,14 @@ COMMANDS
   lit status
     Show information about current lit review.
 
-  lit list <phrases|sets|queries|docs> [--plain]
-    Lists inserted phrase or sets, generated queries, or collected documents.
+  lit list <phrases|queries|docs> [--plain]
+    Lists inserted phrases, generated queries, or collected documents.
     Use --plain to avoid listing related data.
     Alias: ls
 
   lit feed [file]
     Feed current review with phrase sets.
+    The file is expected to contain a JSON formatted list of lists of strings.
 
   lit expand
     Expand phrase sets into queries.

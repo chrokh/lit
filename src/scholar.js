@@ -4,8 +4,6 @@ const { sleep } = require('./robot')
 
 const SEARCH_BOX_ID = '#gs_hdr_tsi'
 const SEARCH_BTN_ID = '#gs_hdr_tsb'
-const NEXT_BTN = '.gs_btnPR'
-const PREV_BTN = '.gs_btnPL'
 const RESULTS = '#gs_res_ccl_mid .gs_r.gs_or'
 
 async function openCiteModal(result) {
@@ -148,24 +146,31 @@ async function pageNum(driver) {
   return (url.match(/start=(\d+)/) || [,0])[1] / 10 + 1
 }
 
-async function crawlPage(driver, page) {
-  await captcha(driver)
-
-  // Check and change page number if necessary
+// Checks page number and changes page if necessary
+async function gotoPage (driver, page) {
   let gpage = await pageNum(driver)
   console.log(`Robot: At page ${gpage} while expecting ${page}`)
   while (gpage != page) {
-    let css = gpage < page ? NEXT_BTN : PREV_BTN
+    let css = gpage < page ? '.gs_btnPR' :  '.gs_btnPL'
     let dir = gpage < page ? 'next' : 'previous'
     console.log(`Robot: Moving to ${dir} page.`)
     let btn = await driver.findElement(By.css(css))
-    await btn.click()
+    try {
+      await btn.click()
+    } catch {
+      css = gpage < page ? '.gs_ico_nav_next' : '.gs_ico_nav_previous'
+      btn = await driver.findElement(By.css(css))
+      await btn.click()
+    }
     await sleep()
     gpage = await pageNum(driver)
     console.log(`Robot: At page ${gpage} while expecting ${page}`)
   }
+}
 
-  // Captcha check
+async function crawlPage(driver, page) {
+  await captcha(driver)
+  await gotoPage(driver, page)
   await captcha(driver)
 
   // Parse page

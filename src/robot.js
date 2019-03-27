@@ -15,7 +15,7 @@ function close(driver) {
   driver.quit()
 }
 
-const sleep = (min=0.5, max=3) => {
+const sleep = (min=2, max=5) => {
   const ms = (Math.random() * (max - min) + min) * 1000
   console.log(`Robot: Sleeping for ~${Math.round(ms / 1000)} seconds`)
   return new Promise((res) => setTimeout(res, ms))

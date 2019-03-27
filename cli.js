@@ -48,10 +48,9 @@ COMMANDS
   lit status
     Show information about current lit review.
 
-  lit list <phrases|sets|queries|docs> [--plain|--pretty]
+  lit list <phrases|sets|queries|docs> [--plain]
     Lists inserted phrase or sets, generated queries, or collected documents.
     Use --plain to avoid listing related data.
-    Default: --pretty.
     Alias: ls
 
   lit feed [file]

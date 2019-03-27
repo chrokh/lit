@@ -31,7 +31,7 @@ Coming soon. Will distributed as `npm` package.
 
 ## Usage
 
-```bash
+```
 SYNOPSIS
   lit <command> [<args>]
 

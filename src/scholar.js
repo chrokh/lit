@@ -154,10 +154,15 @@ async function gotoPage (driver, page) {
     let css = gpage < page ? '.gs_btnPR' :  '.gs_btnPL'
     let dir = gpage < page ? 'next' : 'previous'
     console.log(`Robot: Moving to ${dir} page.`)
-    let btn = await driver.findElement(By.css(css))
+    try {
+      let btn = await driver.findElement(By.css(css))
+    } catch (_) {
+      console.log(`Robot: Cannot find button to go to ${dir} page`)
+      return false
+    }
     try {
       await btn.click()
-    } catch {
+    } catch (_) {
       css = gpage < page ? '.gs_ico_nav_next' : '.gs_ico_nav_previous'
       btn = await driver.findElement(By.css(css))
       await btn.click()
@@ -166,14 +171,15 @@ async function gotoPage (driver, page) {
     gpage = await pageNum(driver)
     console.log(`Robot: At page ${gpage} while expecting ${page}`)
   }
+  return true
 }
 
 async function crawlPage(driver, page) {
   await captcha(driver)
-  await gotoPage(driver, page)
-  await captcha(driver)
+  if (!await gotoPage(driver, page)) {
+    return []
+  }
 
-  // Parse page
   let numHits = (await readHits(driver)).length
   console.log(`Robot: Collecting ${numHits} hits`)
 
@@ -190,15 +196,16 @@ async function readHits(driver) {
   return await driver.findElements(By.css(RESULTS))
 }
 
-// TODO: Generalize
-async function collect(driver, query) {
+async function collect(driver, query, pages) {
   await openScholar(driver)
   await makeSearch(driver, query)
-  return [
-    ...await crawlPage(driver, 1),
-    ...await crawlPage(driver, 2),
-    ...await crawlPage(driver, 3)
-  ]
+  let hits = []
+  for (let page=1; page<=pages; page++) {
+    hits = [...hits, ...await crawlPage(driver, page)]
+    if (hits.length == 0) break
+  }
+  console.log('Robot: Collection completed.')
+  return hits
 };
 
 // Testing fixture

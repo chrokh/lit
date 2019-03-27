@@ -47,7 +47,9 @@ interact with the robot to deal with CAPTCHAs.
       // Collect articles
       const qs = query.query
       console.log(`Finding documents matching: '${qs}'`)
-      let hits = await collect(driver, qs)
+      // TODO: Generalize the number of pages (into doc count)
+      // and make it a setting somehow.
+      let hits = await collect(driver, qs, 3)
       console.log(`Found ${Object.keys(hits).length} documents.`)
 
       // Build documents

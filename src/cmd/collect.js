@@ -33,6 +33,9 @@ interact with the robot to deal with CAPTCHAs.
 
     for (let query of remainingQs) {
 
+      // for consistency
+      const docId = hit => md5(hit.url + hit.title)
+
       // Build sweep record
       const sweepId = md5(query.id + new Date().toJSON())
       let sweep = {
@@ -43,20 +46,20 @@ interact with the robot to deal with CAPTCHAs.
 
       // Collect articles
       const qs = query.query
-      console.log(`Finding documents matching: "${qs}"`)
+      console.log(`Finding documents matching: '${qs}'`)
       let hits = await collect(driver, qs)
       console.log(`Found ${Object.keys(hits).length} documents.`)
 
       // Build documents
       const documents = hits.map(hit => ({
-        id:  md5(hit.url),
+        id:  docId(hit),
         url: hit.url,
       }))
 
       // Build observations
       const observations = hits.map(hit => ({
         id:         md5(hit.url + sweepId + new Date().toJSON()),
-        documentId: md5(hit.url),
+        documentId: docId(hit),
         sweepId,
         ...hit,
       }))

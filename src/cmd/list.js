@@ -52,7 +52,7 @@ switch (ENTITY) {
     console.log(`lit: please specify what entity to list.`)
     return
   default:
-    console.log(`lit: unknown command "ls ${ENTITY}".`)
+    console.log(`lit: unknown list '${ENTITY}'.`)
     return
 }
 

@@ -1,6 +1,6 @@
 const { Builder, By, Key, until } = require('selenium-webdriver');
 const { k } = require('./base')
-const { sleep } = require('./robot')
+const { sleep, throttle } = require('./robot')
 
 const SEARCH_BOX_ID = '#gs_hdr_tsi'
 const SEARCH_BTN_ID = '#gs_hdr_tsb'
@@ -257,7 +257,11 @@ async function collect(driver, query, pages) {
 };
 
 // Testing fixture
-const collect_fixture = x => {
+async function collectFixture () {
+  await throttle()
+  await throttle()
+  await throttle()
+  await throttle()
   return Promise.resolve([
     { title: 'foo1', url: 'http://whlkkgfjsgkjhasfgd.com' },
     { title: 'foo2', url: 'http://whkgfjsagkjhasfgd.com' },

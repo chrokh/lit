@@ -21,8 +21,22 @@ const sleep = (min=5, max=15) => {
   return new Promise((res) => setTimeout(res, ms))
 }
 
+let COUNT = 0
+async function throttle () {
+  const RPM = 3
+  COUNT++
+  let ms = 0
+  if (COUNT > RPM) {
+    console.log(`Robot: Request limit (${RPM} reqs/min) reached. Sleeping for 1 min.`)
+    ms = 5000
+    COUNT = 0
+  }
+  return await new Promise(r => setTimeout(r, ms))
+}
+
 module.exports = {
   open,
   close,
   sleep,
+  throttle,
 }

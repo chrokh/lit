@@ -8,33 +8,33 @@ const RESULTS = '#gs_res_ccl_mid .gs_r.gs_or'
 const BIBTEX_CITATION = 'body > pre'
 
 async function openCiteModal(result) {
+  await throttle()
   console.log('Robot: Opening citation modal.')
   const links = await result.findElements(By.css('.gs_fl > a'))
   await links[1].click()
-  await sleep(0.1, 0.25)
 }
 
 async function closeCiteModal(driver) {
+  await throttle()
   console.log('Robot: Closing citation modal.')
   const link = await driver.findElement(By.css('#gs_cit-x'))
   await link.click()
-  await sleep(0.1, 0.25)
 }
 
 async function getBibtexLinkFromModal(driver) {
+  await throttle()
   console.log('Robot: Extracting citation link.')
   const links = await driver.findElements(By.css('.gs_citi'))
   let url = await links[0].getAttribute('href')
-  await sleep()
   await captcha(driver, BIBTEX_CITATION)
   return url
 }
 
 async function clickBibtexInModal(driver) {
+  await throttle()
   console.log('Robot: Clicking bibtex.')
   const links = await driver.findElements(By.css('.gs_citi'))
   await links[0].click()
-  await sleep()
   await captcha(driver, BIBTEX_CITATION)
 }
 
@@ -45,9 +45,9 @@ async function grabBibtexString(driver) {
 }
 
 async function backToResults(driver) {
+  await throttle()
   console.log('Robot: Navigating back to results list.')
   await driver.navigate().back()
-  await sleep()
   await captcha(driver, RESULTS)
 }
 
@@ -63,14 +63,14 @@ async function collectCitation(result) {
 }
 
 async function collectCitationLink(result) {
+  await throttle()
   let driver = result.getDriver()
   await captcha(driver, RESULTS)
   await openCiteModal(result)
-  await sleep(0.5, 1.5)
+  await throttle()
   let citation = await getBibtexLinkFromModal(driver)
-  await sleep(1, 2)
+  await throttle()
   await closeCiteModal(driver)
-  await sleep(0.5, 1.5)
   return citation
 }
 
@@ -135,7 +135,7 @@ async function openScholarManually (driver) {
 async function openScholarAutomatically (driver) {
   console.log('Robot: Opening scholar.google.com.')
   await driver.get('http://scholar.google.com')
-  await sleep()
+  await throttle()
   console.log('Robot: Trying to find search box.')
   await captcha(driver, SEARCH_BOX_ID)
 }
@@ -152,7 +152,7 @@ async function openScholar (driver) {
   } finally {
     console.log('Robot: Found search box.')
   }
-  await sleep()
+  await throttle()
 }
 
 async function makeSearch (driver, query) {
@@ -164,13 +164,13 @@ async function makeSearch (driver, query) {
   await searchbox.clear()
   await searchbox.sendKeys(query)
   console.log('Robot: Query typed.')
-  await sleep()
+  await throttle()
 
   // Send search
   console.log('Robot: Submitting query.')
   let button = await driver.findElement(By.css(SEARCH_BTN_ID))
   await button.click()
-  await sleep()
+  await throttle()
 }
 
 async function pageNum(driver) {
@@ -204,7 +204,7 @@ async function gotoPage (driver, page) {
       btn = await driver.findElement(By.css(css))
       await btn.click()
     }
-    await sleep()
+    await throttle()
     await captcha(driver, RESULTS)
     gpage = await pageNum(driver)
     console.log(`Robot: At page ${gpage} while expecting ${page}`)

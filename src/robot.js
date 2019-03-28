@@ -23,6 +23,7 @@ const sleep = (min=5, max=15) => {
 
 let COUNT = 0
 async function throttle () {
+  await sleep(1, 2)
   const RPM = 3
   COUNT++
   let ms = 0

@@ -54,8 +54,9 @@ COMMANDS
   lit expand
     Expand phrase sets into queries.
 
-  lit collect
+  lit collect [--limit=N]
     Execute queries and collect results.
+    Use --limit=N to limit the number of queries to N.
 
   lit help
     This screen.

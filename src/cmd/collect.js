@@ -13,6 +13,11 @@ async function main() {
   const remainingQs = remainingQueries()
   const allQs = Object.values(all('query'))
 
+  const LIMIT = process.argv[3]
+  const limit = LIMIT ?
+    parseInt(LIMIT.match(/--limit=(\d+)/)[1]) :
+    Infinity
+
   console.log(`Completed queries: ${completedQs.length}`)
   console.log(`Remaining queries: ${remainingQs.length}`)
   console.log(`Total:             ${allQs.length}`)
@@ -20,13 +25,21 @@ async function main() {
   // Continue?
   console.log(`
 By selecting yes below, the results of running queries will be saved to your
-database. It will take a long time to complete all queries. You can cancel at
+database. It may take a long time to complete all queries. You can cancel at
 any time by pressing ctrl-c or killing the process. Only result sets from
 completed queries will be saved to your database. Note that you may have to
 interact with the robot to deal with CAPTCHAs.
     `)
+
+  if (limit != Infinity) {
+    console.log(`Limiting collection to ${limit} queries.`)
+    console.log()
+  }
+
   const no = () => console.log('Nothing changed.')
   prompt.cont(go, no)
+
+  let count = 0
 
   async function go () {
     const driver = await open()
@@ -86,6 +99,17 @@ interact with the robot to deal with CAPTCHAs.
       console.log('Sweep summary:')
       console.log(`  Added ${docDiff} seemingly new documents (skipped ${docDups} known documents).`)
       console.log(`  Added ${observations.length} observations.`)
+
+      // Increment counter
+      count++
+
+      // Exit if limit is reached
+      if (count == limit) {
+        console.log(`${count} queries executed. Limit reached. Aborting.`)
+        break
+      } else if(count != Infinity) {
+        console.log(`${count} queries executed. Limit is ${limit}. Continuing.`)
+      }
 
       // Sleep before next
       await sleep(10, 20)

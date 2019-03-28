@@ -5,48 +5,56 @@ const { sleep } = require('./robot')
 const SEARCH_BOX_ID = '#gs_hdr_tsi'
 const SEARCH_BTN_ID = '#gs_hdr_tsb'
 const RESULTS = '#gs_res_ccl_mid .gs_r.gs_or'
+const BIBTEX_CITATION = 'body > pre'
 
 async function openCiteModal(result) {
+  console.log('Robot: Opening citation modal.')
   const links = await result.findElements(By.css('.gs_fl > a'))
   await links[1].click()
+  await sleep(0.1, 0.25)
 }
 
 async function closeCiteModal(driver) {
+  console.log('Robot: Closing citation modal.')
   const link = await driver.findElement(By.css('#gs_cit-x'))
   await link.click()
+  await sleep(0.1, 0.25)
 }
 
 async function clickBibtexInModal(driver) {
+  console.log('Robot: Clicking bibtex.')
   const links = await driver.findElements(By.css('.gs_citi'))
   await links[0].click()
+  await sleep()
+  await captcha(driver, BIBTEX_CITATION)
 }
 
 async function grabBibtexString(driver) {
+  console.log('Robot: Copying citation.')
   const pre = await driver.findElement(By.css('pre'))
   return await pre.getText()
 }
 
-async function collectCitation(result) {
-  let driver = result.getDriver()
-  console.log('Robot: Opening citation modal.')
-  await openCiteModal(result)
-  await sleep()
-  console.log('Robot: Clicking bibtex.')
-  await clickBibtexInModal(driver)
-  await sleep()
-  console.log('Robot: Copying citation.')
-  let citation = await grabBibtexString(driver)
-  await sleep()
+async function backToResults(driver) {
   console.log('Robot: Navigating back to results list.')
   await driver.navigate().back()
   await sleep()
-  console.log('Robot: Closing citation modal.')
+  await captcha(driver, RESULTS)
+}
+
+async function collectCitation(result) {
+  let driver = result.getDriver()
+  await captcha(driver, RESULTS)
+  await openCiteModal(result)
+  await clickBibtexInModal(driver)
+  let citation = await grabBibtexString(driver)
+  await backToResults(driver)
   await closeCiteModal(driver)
-  await sleep()
   return citation
 }
 
 async function collectHit(hit) {
+  await captcha(hit.getDriver(), RESULTS)
   // Check if it's a citation hit or not
   let entry = await hit.findElement(By.css('.gs_ctu')) // is citation?
     .then(_ => collectCitationHit(hit))
@@ -64,6 +72,7 @@ async function collectHit(hit) {
 }
 
 async function collectCitationHit(hit) {
+  await captcha(hit.getDriver(), RESULTS)
   return {
     title:   (await (await hit.findElements(By.css('h3 > span')))[1].getText()),
     url:     (await (await hit.findElements(By.css('.gs_fl > a')))[2].getAttribute('href')),
@@ -73,6 +82,7 @@ async function collectCitationHit(hit) {
 }
 
 async function collectNormalHit(hit) {
+  await captcha(hit.getDriver(), RESULTS)
   return {
     title:   (await hit.findElement(By.css('h3 a')).getText()),
     url:     (await hit.findElement(By.css('h3 a')).getAttribute('href')),
@@ -82,14 +92,15 @@ async function collectNormalHit(hit) {
 }
 
 
-async function captcha (driver) {
-  const text = await driver.findElement(By.css('body')).getText()
-  if (text.indexOf('unusual traffic') != -1) {
-    console.log('Robot: Blocked by CAPTCHA. Please solve manually.')
-    // TODO: Not sure scholar always send us back to where we were!
-    await driver.wait(until.elementLocated(By.css(SEARCH_BOX_ID)))
-    console.log('Robot: CAPTCHA solved.')
-    await sleep()
+async function captcha (driver, expectedSelector) {
+  try {
+    await driver.findElement(By.css(expectedSelector))
+  } catch (_) {
+    console.log('Robot: It seems I\'m blocked.')
+    console.log('Robot: If a CAPTCHA is available, please solve it manually.')
+    console.log('(waiting)')
+    const mins = 5
+    await driver.wait(until.elementLocated(By.css(expectedSelector)), mins * 60000)
   }
 }
 
@@ -105,7 +116,7 @@ async function openScholarAutomatically (driver) {
   await driver.get('http://scholar.google.com')
   await sleep()
   console.log('Robot: Trying to find search box.')
-  await driver.wait(until.elementLocated(By.css(SEARCH_BOX_ID)), 5000)
+  await captcha(driver, SEARCH_BOX_ID)
 }
 
 async function openScholar (driver) {
@@ -124,7 +135,7 @@ async function openScholar (driver) {
 }
 
 async function makeSearch (driver, query) {
-  await captcha(driver)
+  await captcha(driver, SEARCH_BOX_ID)
 
   // Type search
   console.log('Robot: Typing query.')
@@ -147,7 +158,9 @@ async function pageNum(driver) {
 }
 
 // Checks page number and changes page if necessary
+// TODO: Refactor away the while loop in favor of recursion.
 async function gotoPage (driver, page) {
+  await captcha(driver, RESULTS)
   let gpage = await pageNum(driver)
   console.log(`Robot: At page ${gpage} while expecting ${page}`)
   while (gpage != page) {
@@ -157,9 +170,12 @@ async function gotoPage (driver, page) {
     try {
       let btn = await driver.findElement(By.css(css))
     } catch (_) {
-      console.log(`Robot: Cannot find button to go to ${dir} page`)
+      console.log(`Robot: Cannot find button to go to ${dir} page.`)
+      console.log('Robot: Assuming no more results.')
       return false
     }
+    // Due to responsive design the button above might not always be visible,
+    // so if we fail when clicking, we must try another button
     try {
       await btn.click()
     } catch (_) {
@@ -168,6 +184,7 @@ async function gotoPage (driver, page) {
       await btn.click()
     }
     await sleep()
+    await captcha(driver, RESULTS)
     gpage = await pageNum(driver)
     console.log(`Robot: At page ${gpage} while expecting ${page}`)
   }
@@ -175,30 +192,29 @@ async function gotoPage (driver, page) {
 }
 
 async function crawlPage(driver, page) {
-  await captcha(driver)
+  await captcha(driver, SEARCH_BOX_ID)
+
+  // No next page? Then we're done!
   if (!await gotoPage(driver, page)) {
     return []
   }
 
+  // Count hits and print count
   let numHits = (await readHits(driver)).length
   console.log(`Robot: Collecting ${numHits} hits`)
 
+  // Collect one by one. We must recall readHits before every collection since
+  // collecting a hit might mean changing page, which leads to the original
+  // reference being stale.
   let titles = []
   for (let n=0; n<numHits; n++) {
     let hit = (await readHits(driver))[n]
     titles.push(await collectHit(hit))
   }
-
   return titles
 }
 
-async function readHits(driver) {
-  return await driver.findElements(By.css(RESULTS))
-}
-
-async function collect(driver, query, pages) {
-  await openScholar(driver)
-  await makeSearch(driver, query)
+async function crawlPages(driver, pages) {
   let hits = []
   for (let page=1; page<=pages; page++) {
     hits = [...hits, ...await crawlPage(driver, page)]
@@ -206,6 +222,17 @@ async function collect(driver, query, pages) {
   }
   console.log('Robot: Collection completed.')
   return hits
+}
+
+async function readHits(driver) {
+  await captcha(driver, RESULTS)
+  return await driver.findElements(By.css(RESULTS))
+}
+
+async function collect(driver, query, pages) {
+  await openScholar(driver)
+  await makeSearch(driver, query)
+  return await crawlPages(driver, pages)
 };
 
 // Testing fixture

@@ -21,6 +21,15 @@ async function closeCiteModal(driver) {
   await sleep(0.1, 0.25)
 }
 
+async function getBibtexLinkFromModal(driver) {
+  console.log('Robot: Extracting citation link.')
+  const links = await driver.findElements(By.css('.gs_citi'))
+  let url = await links[0].getAttribute('href')
+  await sleep()
+  await captcha(driver, BIBTEX_CITATION)
+  return url
+}
+
 async function clickBibtexInModal(driver) {
   console.log('Robot: Clicking bibtex.')
   const links = await driver.findElements(By.css('.gs_citi'))
@@ -53,6 +62,18 @@ async function collectCitation(result) {
   return citation
 }
 
+async function collectCitationLink(result) {
+  let driver = result.getDriver()
+  await captcha(driver, RESULTS)
+  await openCiteModal(result)
+  await sleep(0.5, 1.5)
+  let citation = await getBibtexLinkFromModal(driver)
+  await sleep(1, 2)
+  await closeCiteModal(driver)
+  await sleep(0.5, 1.5)
+  return citation
+}
+
 async function collectHit(hit) {
   await captcha(hit.getDriver(), RESULTS)
   // Check if it's a citation hit or not
@@ -60,15 +81,15 @@ async function collectHit(hit) {
     .then(_ => collectCitationHit(hit))
     .catch(_ => collectNormalHit(hit))
 
-  // Grab bibtext citation
-  let citation = await collectCitation(hit)
+  // Grab link to bibtext citation
+  let citation = await collectCitationLink(hit)
 
   // Compute additional info
-  let query_url = await hit.getDriver().getCurrentUrl()
-  let accessed  = new Date().toJSON()
+  let queryUrl = await hit.getDriver().getCurrentUrl()
+  let accessed = new Date().toJSON()
 
   // Merge and return
-  return Object.assign(entry, { citation, query_url, accessed })
+  return Object.assign(entry, { citation, queryUrl, accessed })
 }
 
 async function collectCitationHit(hit) {
@@ -99,7 +120,7 @@ async function captcha (driver, expectedSelector) {
     console.log('Robot: It seems I\'m blocked.')
     console.log('Robot: If a CAPTCHA is available, please solve it manually.')
     console.log('(waiting)')
-    const mins = 5
+    const mins = 20
     await driver.wait(until.elementLocated(By.css(expectedSelector)), mins * 60000)
   }
 }

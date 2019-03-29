@@ -1,6 +1,6 @@
 const Comb = require('../combinatorics')
 const { all, len, setAll } = require('../entity')
-const { map, merge, k } = require('../base')
+const { map, merge, k, pipe, dissoc } = require('../base')
 const { collect } = require('../scholar')
 const { open, close, sleep } = require('../robot')
 const { md5, toRecords, toRecord } = require('../keyify')
@@ -67,8 +67,9 @@ interact with the robot to deal with CAPTCHAs.
 
       // Build documents
       const documents = hits.map(hit => ({
-        id:  docId(hit),
-        url: hit.url,
+        id:    docId(hit),
+        title: hit.title,
+        url:   hit.url,
       }))
 
       // Build observations
@@ -76,7 +77,7 @@ interact with the robot to deal with CAPTCHAs.
         id:         md5(hit.url + sweepId + new Date().toJSON()),
         documentId: docId(hit),
         sweepId,
-        ...hit,
+        ...pipe(dissoc('title'), dissoc('url'))(hit)
       }))
 
       // Update sweep with end-timestamp
@@ -97,8 +98,8 @@ interact with the robot to deal with CAPTCHAs.
       const docDiff = Object.keys(mergedDocs).length - Object.keys(oldDocs).length
       const docDups = documents.length - docDiff
       console.log('Sweep summary:')
-      console.log(`  Added ${docDiff} seemingly new documents (skipped ${docDups} known documents).`)
       console.log(`  Added ${observations.length} observations.`)
+      console.log(`  Added ${docDiff} seemingly new documents (skipped ${docDups} known documents).`)
 
       // Increment counter
       count++

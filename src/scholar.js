@@ -1,3 +1,4 @@
+
 const { Builder, By, Key, until } = require('selenium-webdriver');
 const { k } = require('./base')
 const { sleep, throttle } = require('./robot')
@@ -76,29 +77,29 @@ async function collectCitationLink(result) {
 
 async function collectHit(hit) {
   await captcha(hit.getDriver(), RESULTS)
-  // Check if it's a citation hit or not
-  let entry = await hit.findElement(By.css('.gs_ctu')) // is citation?
+
+  // Check if it's a citation hit or not and grab base data
+  const entry = await hit.findElement(By.css('.gs_ctu')) // is citation?
     .then(_ => collectCitationHit(hit))
     .catch(_ => collectNormalHit(hit))
 
-  // Grab link to bibtext citation
-  let citation = await collectCitationLink(hit)
+  // Grab common data
+  const commons = await collectCommonsFromHit(hit)
 
   // Compute additional info
-  let queryUrl = await hit.getDriver().getCurrentUrl()
-  let accessed = new Date().toJSON()
+  const queryUrl = await hit.getDriver().getCurrentUrl()
+  const accessed = new Date().toJSON()
 
   // Merge and return
-  return Object.assign(entry, { citation, queryUrl, accessed })
+  return { ...entry, ...commons, queryUrl, accessed, }
 }
 
 async function collectCitationHit(hit) {
   await captcha(hit.getDriver(), RESULTS)
   return {
-    title:   (await (await hit.findElements(By.css('h3 > span')))[1].getText()),
-    url:     (await (await hit.findElements(By.css('.gs_fl > a')))[2].getAttribute('href')),
-    about:   '',
-    authors: (await hit.findElement(By.css('.gs_a')).getText()),
+    title:  (await (await hit.findElements(By.css('h3 > span')))[1].getText()),
+    url:    (await (await hit.findElements(By.css('.gs_fl > a')))[2].getAttribute('href')),
+    author: (await hit.findElement(By.css('.gs_a')).getText()),
   }
 }
 
@@ -107,11 +108,55 @@ async function collectNormalHit(hit) {
   return {
     title:   (await hit.findElement(By.css('h3 a')).getText()),
     url:     (await hit.findElement(By.css('h3 a')).getAttribute('href')),
-    about:   (await hit.findElement(By.css('.gs_rs')).getText()),
-    authors: (await hit.findElement(By.css('.gs_a')).getText()),
+    excerpt: (await hit.findElement(By.css('.gs_rs')).getText()),
   }
 }
 
+async function collectCommonsFromHit(hit) {
+  await captcha(hit.getDriver(), RESULTS)
+  const citations = await findMetaLink(hit, 'cites')
+  const related = await findMetaLink(hit, 'related')
+  const cluster = await findMetaLink(hit, 'cluster')
+  const wos = await findMetaLink(hit, 'webofknowledge')
+  return {
+    author:       (await hit.findElement(By.css('.gs_a')).getText()),
+    // Internal google scholar links
+    ...(citations && { citationsUrl: citations.url }),
+    ...(related && { relatedUrl: related.url }),
+    ...(cluster && { clusterUrl: cluster.url }),
+    // Parsing google scholar link info
+    ...(citations && { citationCount: citations.title.match(/\d+/)[0] }),
+    ...(wos && { webOfScienceCitationCount: wos.title.match(/\d+/)[0] }),
+    ...(cluster && { clusterCount: cluster.title.match(/\d+/)[0] }),
+    // Possible full text links
+    fullTextLinks: (await collectFullTextLinks(hit)),
+  }
+}
+
+async function findMetaLink (hit, kind) {
+  const elems = await hit.findElements(By.css('.gs_fl > a'))
+  for (let elem of elems) {
+    let url = await elem.getAttribute('href')
+    if (url.indexOf(kind) != -1)
+      return {
+        title: await elem.getText(),
+        url,
+      }
+  }
+}
+
+async function collectFullTextLinks (hit) {
+  return hit.findElements(By.css('.gs_or_ggsm a')).
+    then(elems => Promise.all(elems.map(collectLink))).
+    catch(_ => [])
+}
+
+async function collectLink (elem) {
+  return {
+    url:   (await elem.getAttribute('href')),
+    title: (await elem.getText()),
+  }
+}
 
 async function captcha (driver, expectedSelector) {
   try {

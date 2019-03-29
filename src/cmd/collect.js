@@ -106,7 +106,7 @@ interact with the robot to deal with CAPTCHAs.
 
       // Exit if limit is reached
       if (count == limit) {
-        console.log(`${count} queries executed. Limit reached. Aborting.`)
+        console.log(`${count} queries executed. Custom limit reached. Aborting.`)
         break
       } else if(count != Infinity) {
         console.log(`${count} queries executed. Limit is ${limit}. Continuing.`)

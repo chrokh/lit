@@ -1,12 +1,22 @@
 const { Builder, Capabilities } = require('selenium-webdriver')
+const chrome = require('selenium-webdriver/chrome')
+
 
 async function open() {
   console.log('Robot: Opening.')
-  const caps = new Capabilities({ acceptInsecureCerts: true })
+
+  var opts = new chrome.Options()
+  opts.addArguments('user-data-dir=.lit/chrome_profile');
+
+  const caps = new Capabilities({
+    acceptInsecureCerts: true,
+  })
+
   return await
     new Builder().
     withCapabilities(caps).
-    forBrowser('firefox').
+    setChromeOptions(opts).
+    forBrowser('chrome').
     build()
 }
 
@@ -23,13 +33,13 @@ const sleep = (min=5, max=15) => {
 
 let COUNT = 0
 async function throttle () {
-  await sleep(1, 2)
+  await sleep(3, 5) // TODO: Parameterize noise
   const RPM = 3
   COUNT++
   let ms = 0
   if (COUNT > RPM) {
-    console.log(`Robot: Request limit (${RPM} reqs/min) reached. Sleeping for 1 min.`)
-    ms = 5000
+    ms = 60000
+    console.log(`Robot: Request limit (${RPM} reqs/min) reached. Sleeping for ${ms/1000} seconds.`)
     COUNT = 0
   }
   return await new Promise(r => setTimeout(r, ms))

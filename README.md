@@ -19,9 +19,15 @@ Lit can help you:
 Instabilities and bugs should be expected. This is an early-stage project.
 
 
-## Pre-requisites
+## Dependencies
 
-We use `geckodriver` for [Selenium](https://www.seleniumhq.org/) which means that you must have both [Firefox](https://www.mozilla.org/firefox/) and geckodriver installed. Note that geckodriver must be available in your `PATH`. While `geckodriver` is available on the [download page](https://www.seleniumhq.org/download/) on the Selenium website you can usually also install it using your platform's package manager (such as e.g. [Homebrew](https://brew.sh/) for Mac OS).
+To avoid issues, I humbly remind you to prefer installing software using your platform's package manager rather than manually (unless of course you know what you're doing). Package managers are a convenient way of installing and uninstalling applications. Kind of like the App Store on a Mac. Except that the correct thing to say would be that the App Store is like package managers since they've been around for eons. For Mac OS there's [Homebrew](https://brew.sh/) and for Windows there's [Chocolatey](https://chocolatey.org/), and if you're on Linux you already know what a package manager is :P
+
+1. Install Node.js and npm (consider a node version manager like e.g. `n`).
+2. Install Selenium.
+3. Install Google Chrome.
+4. Install `chromedriver`.
+5. Ensure that `chromedriver` is available in your system's PATH. This should not be an issue if you installed the driver via your package manager.
 
 
 ## Installation

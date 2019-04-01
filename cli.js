@@ -35,6 +35,11 @@ async function index () {
       require('./src/cmd/collect')
       return
 
+    case 'add':
+    case 'a':
+      require('./src/cmd/add')
+      return
+
     case '--help':
     case 'help':
     case undefined:
@@ -48,7 +53,7 @@ COMMANDS
   lit status
     Show information about current lit review.
 
-  lit list <phrases|queries|docs> [--plain]
+  lit list <phrases|queries|docs|tags> [--plain]
     Lists inserted phrases, generated queries, or collected documents.
     Use --plain to avoid listing related data.
     Alias: ls
@@ -63,6 +68,10 @@ COMMANDS
   lit collect [--limit=N]
     Execute queries and collect results.
     Use --limit=N to limit the number of queries to N.
+
+  lit add [<tag>+]
+    Add new tag to the list of available tags.
+    Separate tags with spaces to add multiple tags at once.
 
   lit help
   This screen.`)

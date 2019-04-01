@@ -64,6 +64,10 @@ COMMANDS
     Execute queries and collect results.
     Use --limit=N to limit the number of queries to N.
 
+  lit add [<tag>+]
+    Add new tag to the list of available tags.
+    Separate tags with spaces to add multiple tags at once.
+
   lit help
     This screen.
 ```

@@ -40,6 +40,8 @@ switch (ENTITY) {
         console.log(`lit: invalid flag '${PLAIN}'`)
         return
     }
+  case 'tags':
+    return plainTags()
   case undefined:
     console.log(`lit: please specify what entity to list.`)
     return
@@ -78,6 +80,16 @@ function plainQueries () {
       map(prop('query')),
       join('\n')
     )(all('query'))
+  )
+}
+
+function plainTags () {
+  console.log(
+    pipe(
+      Object.values,
+      map(prop('name')),
+      join('\n')
+    )(all('tag'))
   )
 }
 

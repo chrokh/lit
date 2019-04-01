@@ -68,6 +68,9 @@ COMMANDS
     Add new tag to the list of available tags.
     Separate tags with spaces to add multiple tags at once.
 
+  lit tag
+    Begin or resure document tagging/coding.
+
   lit help
     This screen.
 ```

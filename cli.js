@@ -40,6 +40,11 @@ async function index () {
       require('./src/cmd/add')
       return
 
+    case 'tag':
+    case 't':
+      require('./src/cmd/tag')
+      return
+
     case '--help':
     case 'help':
     case undefined:
@@ -72,6 +77,9 @@ COMMANDS
   lit add [<tag>+]
     Add new tag to the list of available tags.
     Separate tags with spaces to add multiple tags at once.
+
+  lit tag
+    Begin or resure document tagging/coding.
 
   lit help
   This screen.`)

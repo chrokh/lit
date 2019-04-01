@@ -20,6 +20,7 @@ const init = () => {
   fs.writeFileSync(`${BASE}/document.json`, '{}', 'UTF-8')
   fs.writeFileSync(`${BASE}/observation.json`, '{}', 'UTF-8')
   fs.writeFileSync(`${BASE}/tag.json`, '{}', 'UTF-8')
+  fs.writeFileSync(`${BASE}/mark.json`, '{}', 'UTF-8')
   return BASE
 }
 

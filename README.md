@@ -65,8 +65,7 @@ COMMANDS
     Use --limit=N to limit the number of queries to N.
 
   lit add [<tag>+]
-    Add new tag to the list of available tags.
-    Separate tags with spaces to add multiple tags at once.
+    Add new tag to the list of available tags. Separate with spaces.
 
   lit browse [--tag] [--save]
     Browse and tag documents.

@@ -3,7 +3,7 @@ const { toRecords } = require('../keyify')
 const { all, setAll } = require('../entity')
 const prompt = require('../prompt')
 
-// Read filter
+// Parse options
 const ARGS = [...process.argv.slice(3)]
 const OPTS = {
   autoSave: ARGS.indexOf('--save') != -1,

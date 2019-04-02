@@ -4,7 +4,11 @@ const { all, setAll } = require('../entity')
 const prompt = require('../prompt')
 
 // Read filter
-const FILTER = process.argv[3]
+const ARGS = [...process.argv.slice(3)]
+const OPTS = {
+  autoSave: ARGS.indexOf('--save') != -1,
+  tagMode: ARGS.indexOf('--tag') != -1,
+}
 
 // Read tags and marks
 const tags = Object.values(all('tag'))
@@ -46,28 +50,28 @@ const printTags = (tags, doc, marks) => {
   console.log(docTags.map(t => `${t.num}: [${t.mark}] ${t.name}`).join('\n'))
 }
 
-// Define tagging function
-async function tagNext (docs, idx) {
-  if (idx < 0) idx = 0
-  if (idx == docs.length) {
-    console.log('No more matching documents left to tag.')
-    return
-  }
+async function browse (docs, idx) {
+  if (idx < 0) idx = docs.length - 1 // wrap left
+  if (idx >= docs.length) idx = 0 // wrap right
+  prompt.clear()
+  printTimeline(docs, idx)
+  printDoc(docs[idx])
+  console.log()
+  printTags(tags, docs[idx], Object.values(all('mark')))
+  if (OPTS.tagMode)
+    retag(docs, idx)
+  else
+    navigate(docs, idx)
+}
 
+// Define tagging function
+async function retag (docs, idx) {
   const doc = docs[idx]
   const marks = Object.values(all('mark'))
 
-  // Print doc and tags
-  prompt.clear()
-  printTimeline(docs, idx)
-  printDoc(doc)
-  console.log()
-  printTags(tags, doc, marks)
-
-
   // Print instructions and parse output
   console.log()
-  console.log('Pick tags by number. Separate with comma. End with enter.')
+  console.log('Retag using numbers. Separate with comma. End with enter.')
   const alts = tags.map((_, i) => i + 1)
   const picks = await prompt.checkbox(alts)
   const indexPicks = picks.map(pick => parseInt(pick - 1))
@@ -95,14 +99,23 @@ async function tagNext (docs, idx) {
     printTags(tags, doc, mergedMarksArr)
 
     // Confirm changes and move to next or back to the same
-    console.log()
     const doNothing = () => console.log('Nothing changed.')
-    const doNext = () => setAll('mark')(mergedMarksObj)
-    await prompt.save(doNext, doNothing)
-    await navigate(docs, idx)
+    const doSave = () => setAll('mark')(mergedMarksObj)
+    if (OPTS.autoSave) {
+      doSave()
+    } else {
+      console.log()
+      await prompt.save(doSave, doNothing)
+    }
   } else {
     console.log('Nothing changed.')
-    await navigate(docs, idx)
+  }
+
+  // Back to browsing screen
+  if (OPTS.tagMode) {
+    await browse(docs, idx + 1)
+  } else {
+    await browse(docs, idx)
   }
 }
 
@@ -127,14 +140,13 @@ function printDoc (doc) {
 }
 
 async function navigate (docs, idx) {
-  const doNext = () => tagNext(docs, idx+1)
-  const doSame = () => tagNext(docs, idx)
-  const doPrev = () => tagNext(docs, idx-1)
-  const nothing = () => {}
+  const doNext = () => browse(docs, idx+1)
+  const doPrev = () => browse(docs, idx-1)
+  const doTag  = () => retag(docs, idx)
   console.log()
   await prompt.pick(
-    `Tag next (n), previous (p), or same (s)?`,
-    { n: doNext, s: doSame, p: doPrev })
+`Go to next (n), previous (p) or choose tags (t) for this document?`,
+    { n:doNext, f:doNext, p:doPrev, b:doPrev, t:doTag })
 }
 
 function printTimeline (docs, idx) {
@@ -149,5 +161,4 @@ function printTimeline (docs, idx) {
   console.log()
 }
 
-// Begin tagging
-tagNext(docs, 0)
+browse(docs, 0)

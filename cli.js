@@ -40,9 +40,9 @@ async function index () {
       require('./src/cmd/add')
       return
 
-    case 'tag':
-    case 't':
-      require('./src/cmd/tag')
+    case 'browse':
+    case 'b':
+      require('./src/cmd/browse')
       return
 
     case '--help':
@@ -78,8 +78,10 @@ COMMANDS
     Add new tag to the list of available tags.
     Separate tags with spaces to add multiple tags at once.
 
-  lit tag
-    Begin or resure document tagging/coding.
+  lit browse [--tag] [--save]
+    Browse and tag documents.
+    Use --tag to enter tag mode and move to the next document automatically.
+    Use --save to automatically save changes.
 
   lit help
   This screen.`)

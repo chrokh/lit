@@ -5,7 +5,6 @@ const opts = require('../opts')
 // Parse options
 const ARGS = [...process.argv.slice(3)]
 const OPTS = opts.toObj({ format: 'simple' })([...process.argv.slice(3)])
-const COLS = process.stdout.columns
 
 // Read data
 const observations = Object.values(all('observation'))
@@ -22,7 +21,8 @@ const expandDocument = doc => {
   const { excerpt, author } = matchingObservations[0]
   return { ...doc, excerpt, author, tags: matchingTags }
 }
-const toDocumentString = doc => `* ${doc.title}`
+const toDocumentString = doc =>
+  `* ${doc.id.substring(0, 7)} ${doc.title}`
 
 // Finds all tags of a document
 const documentTags = docId => {

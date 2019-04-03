@@ -1,6 +1,7 @@
 const k = x => _ => x
 const pipe = (...fs) => x => fs.reduce((acc, f) => f(acc), x)
 const map = f => xs => xs.map(f)
+const not = f => x => !f(x)
 const add = x => y => x + y
 const len = xs => xs.length
 const join = s => xs => xs.join(s)
@@ -79,6 +80,7 @@ const transpose = xs => {
 module.exports = {
   pipe,
   map,
+  not,
   add,
   join,
   flat,

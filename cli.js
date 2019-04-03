@@ -86,9 +86,11 @@ COMMANDS
     Use --tag to enter tag mode and move to the next document automatically.
     Use --save to automatically save changes.
 
-  lit export [--untagged] [--format=json]
+  lit export [--untagged] [--only=<tag>] [--skip=<tag>] [--format=json]
     Print list of documents to standard out.
     Use --untagged to only list untagged documents.
+    Use --only=<tag> to only list documents matching the tag.
+    Use --skip=<tag> to not list documents matching the tag.
     Use --format=json to output in JSON format.
 
   lit help

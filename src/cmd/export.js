@@ -1,4 +1,4 @@
-const { pipe, map, join, filter, k } = require('../base')
+const { pipe, map, join, filter, k, not } = require('../base')
 const { all } = require('../entity')
 const opts = require('../opts')
 
@@ -36,11 +36,18 @@ const documentTags = docId => {
 
 // Filter functions / predicates
 const isUntagged = doc => documentTags(doc.id).length == 0
+// TODO: Replace hasTag with boolean algebra based match string.
+// E.g: relevant|(review&important)
+const hasTag = tag => doc =>
+  documentTags(doc.id).
+    map(t => t.name).
+    indexOf(tag) != -1
 
 // Single filter function
 const filterer = pipe(
   filter(OPTS.untagged ? isUntagged : k(true)),
-  // TODO: Add more arg-based filters here
+  filter(OPTS.only ? hasTag(OPTS.only) : k(true)),
+  filter(OPTS.skip ? not(hasTag(OPTS.skip)) : k(true)),
 )
 
 // Single formatting function

@@ -40,49 +40,44 @@ Coming soon. Will distributed as `npm` package.
 ## Usage
 
 ```
-SYNOPSIS
-  lit <command> [<args>]
+Usage: lit <command>
 
-COMMANDS
-  lit init
-    Initialize new review in current dir.
+lit init
+  Initialize new review in current dir.
 
-  lit status
-    Show information about current lit review.
+lit status
+  Show information about current lit review.
 
-  lit list <phrases|queries|docs> [--plain]
-    Lists inserted phrases, generated queries, or collected documents.
-    Use --plain to avoid listing related data.
-    Alias: ls
+lit list <entity> [<args>]
+  Print entities to standard out.
+  <entity>  phrases | queries | tags | docs
+  --plain   No pretty printing
 
-  lit feed [file]
-    Feed current review with phrase sets.
-    The file is expected to contain a JSON formatted list of lists of strings.
+lit feed [file]
+  Feed current review with phrase sets.
+  [file]  JSON formatted list of list of strings.
 
-  lit expand
-    Expand phrase sets into queries.
+lit expand
+  Expand phrase sets into queries.
 
-  lit collect [--limit=N]
-    Execute queries and collect results.
-    Use --limit=N to limit the number of queries to N.
+lit collect [<args>]
+  Execute queries and collect results.
+  --limit=N  Number of queries to execute.
 
-  lit add [<tag>+]
-    Add new tag to the list of available tags. Separate with spaces.
+lit add <tags>
+  <tag>  Tags to add. Separate with spaces.
 
-  lit browse [--tag] [--save]
-    Browse and tag documents.
-    Use --tag to enter tag mode and move to the next document automatically.
-    Use --save to automatically save changes.
+lit browse [<args>]
+  Browse and tag documents.
+  --tag   Tag mode.
+  --save  Save changes whenever prompted.
 
-  lit export [--untagged] [--only=<tag>] [--skip=<tag>] [--format=json]
-    Print list of documents to standard out.
-    Use --untagged to only list untagged documents.
-    Use --only=<tag> to only include documents matching the given tag.
-    Use --skip=<tag> to ignore documents matching the given tag.
-    Use --format=json to output in JSON format.
-
-  lit help
-    This screen.
+lit export [<args>]
+  Print list of documents to standard out.
+  --untagged     Only untagged.
+  --only=<tag>   Matching tag.
+  --skip=<tag>   Not matching tag.
+  --format=json  Format output as JSON.
 ```
 
 

@@ -89,8 +89,8 @@ COMMANDS
   lit export [--untagged] [--only=<tag>] [--skip=<tag>] [--format=json]
     Print list of documents to standard out.
     Use --untagged to only list untagged documents.
-    Use --only=<tag> to only list documents matching the tag.
-    Use --skip=<tag> to not list documents matching the tag.
+    Use --only=<tag> to only include documents matching the given tag.
+    Use --skip=<tag> to ignore documents matching the given tag.
     Use --format=json to output in JSON format.
 
   lit help

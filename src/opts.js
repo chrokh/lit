@@ -23,10 +23,10 @@ const toSetting = str => {
   return { [key]: value }
 }
 
-const toObj = args =>
+const toObj = base => args =>
   args.
     map(toSetting).
-    reduce((acc, obj) => Object.assign(acc, obj), {})
+    reduce((acc, obj) => Object.assign(acc, obj), base)
 
 module.exports = {
   toObj

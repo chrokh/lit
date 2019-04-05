@@ -46,13 +46,21 @@ interact with the robot to deal with CAPTCHAs.
 
     for (let query of remainingQs) {
 
-      // Use cluster url as id if available, otherwise use title + author.
-      // Main external url cannot be used since parameters can vary and
-      // determining which parameters are critical is non-trivial.
-      const docId = hit => md5(
-        hit.clusterUrl ?
-        hit.clusterUrl.match(/(.*?)(\?|$)/)[1] :
-        hit.title + hit.author)
+      // Extracting google scholar identifier
+      const googleScholarId = hit => {
+        if (hit.citationsUrl)
+          return hit.citationsUrl.match(/cites=(\d+)/)[1]
+        else if (hit.clusterUrl)
+          return hit.clusterUrl.match(/cluster=(\d+)/)[1]
+        else {
+          console.log(hit)
+          throw 'Unable to extract Google Scholar identifier. Please report the dumped item above to the developers of lit.'
+          // NOTE: If this is every hit I might reconsider using: title+author
+        }
+      }
+
+      // For consistency
+      const docId = hit => md5(googleScholarId(hit))
 
       // Build sweep record
       const sweepId = md5(query.id + new Date().toJSON())
@@ -72,9 +80,8 @@ interact with the robot to deal with CAPTCHAs.
 
       // Build documents
       const documents = hits.map(hit => ({
-        id:    docId(hit),
-        title: hit.title,
-        url:   hit.url,
+        id: docId(hit),
+        googleScholarId: googleScholarId(hit),
       }))
 
       // Build observations
@@ -82,7 +89,7 @@ interact with the robot to deal with CAPTCHAs.
         id:         md5(hit.url + sweepId + new Date().toJSON()),
         documentId: docId(hit),
         sweepId,
-        ...pipe(dissoc('title'), dissoc('url'))(hit)
+        ...hit,
       }))
 
       // Update sweep with end-timestamp

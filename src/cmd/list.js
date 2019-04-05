@@ -2,24 +2,16 @@ const chalk = require('chalk')
 const { pipe, map, join, filter, k, not } = require('../base')
 const { all } = require('../entity')
 const vmDocs = require('../vm/documents')
+const { expandDocument } = require('../vm/document')
 const opts = require('../opts')
 
 // Parse options
 const OPTS = opts.toObj({ format: 'simple' })([...process.argv.slice(3)])
 
-// Read data
-const observations = Object.values(all('observation'))
-const documents = Object.values(all('document'))
-
 // Data transformation functions
-const expandDocument = doc => {
-  const matches = observations.filter(ob => ob.documentId == doc.id)
-  const { excerpt, author } = matches[0] // TODO: consolidate
-  return { ...doc, excerpt, author }
-}
-const title = doc => doc.id.substring(0, 7)
+const shortId = doc => doc.id.substring(0, 7)
 const toDocumentString = doc =>
-  `* ${chalk.yellow(title(doc))} ${doc.title}`
+  `* ${chalk.yellow(shortId(doc))} ${doc.title}`
 
 // Single formatting function
 const formatter = OPTS.format.toLowerCase() == 'json' ?
@@ -28,8 +20,10 @@ const formatter = OPTS.format.toLowerCase() == 'json' ?
 
 // Main
 pipe(
+  all,
+  Object.values,
   map(expandDocument),
   vmDocs.filter(OPTS),
   formatter,
   console.log,
-)(documents)
+)('document')

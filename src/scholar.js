@@ -316,15 +316,9 @@ async function collect(driver, query, pages) {
 
 // Testing fixture
 async function collectFixture () {
-  await throttle()
-  await throttle()
-  await throttle()
-  await throttle()
   return Promise.resolve([
-    { title: 'foo1', author: 'Doe, John, ...', url: 'http://whlkkgfjsgkjhasfgd.com' },
-    { title: 'foo2', author: 'Doe, John, ...', url: 'http://whkgfjsagkjhasfgd.com' },
-    { title: 'foo3', author: 'Doe, John, ...', url: 'http://whlkkgfjshasfgd.com', clusterUrl: 'http://example.com?1231432' },
-    { title: 'foo4', author: 'Doe, John, ...', url: 'http://whgfjsdagkjhasfgd.com' },
+    { title: 'foo1', author: 'Doe, John, ...', url: 'http://whkgfjsagkjhasfgd.com', citationsUrl: 'http://example.com?cites=89757865' },
+    { title: 'foo2', author: 'Doe, John, ...', url: 'http://whlkkgfjshasfgd.com', clusterUrl: 'http://example.com?cluster=1231432' },
   ])
 }
 

@@ -34,7 +34,7 @@ const sleep = (min=5, max=15) => {
 let COUNT = 0
 async function throttle () {
   await sleep(3, 5) // TODO: Parameterize noise
-  const RPM = 3
+  const RPM = 5
   COUNT++
   let ms = 0
   if (COUNT > RPM) {

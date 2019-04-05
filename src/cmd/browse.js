@@ -3,13 +3,14 @@ const { toRecords } = require('../keyify')
 const { all, setAll } = require('../entity')
 const prompt = require('../prompt')
 const vmDocument = require('../vm/document')
+const vmDocuments = require('../vm/documents')
+const opts = require('../opts')
 
 // Parse options
-const ARGS = [...process.argv.slice(3)]
-const OPTS = {
-  autoSave: ARGS.indexOf('--save') != -1,
-  tagMode: ARGS.indexOf('--tag') != -1,
-}
+const OPTS = opts.toObj({
+  save: false,
+  tag:  false,
+})([...process.argv.slice(3)])
 
 // Read tags and marks
 const tags = Object.values(all('tag'))
@@ -21,14 +22,15 @@ if (tags.length == 0) {
   return
 }
 
-// Filter function
-const matchesFilter = doc => true
-
 // Filter out documents to tag
 const docs = pipe(
   Object.values,
-  filter(matchesFilter)
+  vmDocuments.filter(OPTS)
 )(all('document'))
+
+// Quit if no docs
+if (docs.length < 1)
+  return console.log(`lit: No matching documents.`)
 
 // Pre-fetch observation data
 const observations = Object.values(all('observation'))
@@ -59,7 +61,7 @@ async function browse (docs, idx) {
   vmDocument.print(docs[idx])
   console.log()
   printTags(tags, docs[idx], Object.values(all('mark')))
-  if (OPTS.tagMode)
+  if (OPTS.tag)
     retag(docs, idx)
   else
     navigate(docs, idx)
@@ -102,7 +104,7 @@ async function retag (docs, idx) {
     // Confirm changes and move to next or back to the same
     const doNothing = () => console.log('Nothing changed.')
     const doSave = () => setAll('mark')(mergedMarksObj)
-    if (OPTS.autoSave) {
+    if (OPTS.save) {
       doSave()
     } else {
       console.log()
@@ -113,7 +115,7 @@ async function retag (docs, idx) {
   }
 
   // Back to browsing screen
-  if (OPTS.tagMode) {
+  if (OPTS.tag) {
     await browse(docs, idx + 1)
   } else {
     await browse(docs, idx)

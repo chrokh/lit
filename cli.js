@@ -80,8 +80,12 @@ lit add <tags>
 
 lit browse [<args>]
   Browse and tag documents.
-  --tag   Tag mode.
-  --save  Save changes whenever prompted.
+  --tag          Tag mode.
+  --save         Save changes whenever prompted.
+  --untagged     Only untagged.
+  --tagged       Only tagged.
+  --only=<tag>   Matching tag.
+  --skip=<tag>   Not matching tag.
 
 lit list [<args>]
   Print list of documents to standard out. Alias: 'ls'.

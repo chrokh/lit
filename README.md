@@ -48,11 +48,6 @@ lit init
 lit status
   Show information about current lit review.
 
-lit list <entity> [<args>]
-  Print entities to standard out.
-  <entity>  phrases | queries | tags | docs
-  --plain   No pretty printing
-
 lit feed [file]
   Feed current review with phrase sets.
   [file]  JSON formatted list of list of strings.

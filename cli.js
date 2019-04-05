@@ -15,11 +15,6 @@ async function index () {
       require('./src/cmd/status')
       return
 
-    case 'list':
-    case 'ls':
-      require('./src/cmd/list')
-      return
-
     case 'feed':
     case 'f':
       require('./src/cmd/feed')
@@ -45,6 +40,10 @@ async function index () {
       require('./src/cmd/browse')
       return
 
+    case 'inspect':
+      require('./src/cmd/inspect')
+      return
+
     case 'export':
       require('./src/cmd/export')
       return
@@ -59,11 +58,6 @@ lit init
 
 lit status
   Show information about current lit review.
-
-lit list <entity> [<args>]
-  Print entities to standard out.
-  <entity>  phrases | queries | tags | docs
-  --plain   No pretty printing
 
 lit feed [file]
   Feed current review with phrase sets.

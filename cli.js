@@ -49,6 +49,10 @@ async function index () {
       require('./src/cmd/list')
       return
 
+    case 'show':
+      require('./src/cmd/show')
+      return
+
     case '--help':
     case 'help':
     case undefined:
@@ -85,7 +89,10 @@ lit list [<args>]
   --tagged       Only tagged.
   --only=<tag>   Matching tag.
   --skip=<tag>   Not matching tag.
-  --format=json  Format output as JSON.`)
+  --format=json  Format output as JSON.
+
+lit show <id>
+  Show document with id.`)
       return
 
 default:

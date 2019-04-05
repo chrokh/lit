@@ -74,6 +74,9 @@ lit list [<args>]
   --only=<tag>   Matching tag.
   --skip=<tag>   Not matching tag.
   --format=json  Format output as JSON.
+
+lit show <id>
+  Show document with id.
 ```
 
 

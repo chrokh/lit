@@ -2,6 +2,7 @@ const { pipe, filter } = require('../base')
 const { toRecords } = require('../keyify')
 const { all, setAll } = require('../entity')
 const prompt = require('../prompt')
+const vmDocument = require('../vm/document')
 
 // Parse options
 const ARGS = [...process.argv.slice(3)]
@@ -55,7 +56,7 @@ async function browse (docs, idx) {
   if (idx >= docs.length) idx = 0 // wrap right
   prompt.clear()
   printTimeline(docs, idx)
-  printDoc(docs[idx])
+  vmDocument.print(docs[idx])
   console.log()
   printTags(tags, docs[idx], Object.values(all('mark')))
   if (OPTS.tagMode)
@@ -94,7 +95,7 @@ async function retag (docs, idx) {
   if (newMarks.length > 0) {
     prompt.clear()
     printTimeline(docs, idx)
-    printDoc(doc)
+    vmDocument.print(doc)
     console.log()
     printTags(tags, doc, mergedMarksArr)
 
@@ -119,26 +120,6 @@ async function retag (docs, idx) {
   }
 }
 
-function printDoc (doc) {
-  // Extract basic info
-  const { title, url } = doc
-
-  // Find matching observations and extract complex info
-  const obs = observations.filter(ob => ob.documentId == doc.id)
-  const { excerpt, author } = obs[0] // TODO: Should consolidate different observations first
-
-  // Make divider lines
-  const smDivider = '-'.repeat(60)
-  const lgDivider = '='.repeat(60)
-
-  // Print document info
-  console.log(title.toUpperCase())
-  console.log(lgDivider)
-  console.log(author)
-  console.log()
-  console.log(excerpt)
-}
-
 async function navigate (docs, idx) {
   const doNext = () => browse(docs, idx+1)
   const doPrev = () => browse(docs, idx-1)
@@ -158,7 +139,6 @@ function printTimeline (docs, idx) {
   const num = `${idx+1} / ${docs.length}`
   console.log(num)
   console.log(timeline)
-  console.log()
 }
 
 browse(docs, 0)

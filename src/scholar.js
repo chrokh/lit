@@ -223,36 +223,49 @@ async function pageNum(driver) {
   return (url.match(/start=(\d+)/) || [,0])[1] / 10 + 1
 }
 
+async function hasMoreResults (driver) {
+  try {
+    await driver.findElement(By.css('.gs_btnPR'))
+    return true
+  } catch {
+    return false
+  }
+}
+
+async function nextPageButton (driver) {
+  // Two different classes due to responsive design
+  let text = await driver.findElement(By.css('.gs_btnPR'))
+  let icon = await driver.findElement(By.css('.gs_ico_nav_next'))
+  return (await text.isDisplayed()) ? text : icon
+}
+
+async function prevPageButton (driver) {
+  // Two different classes due to responsive design
+  let text = await driver.findElement(By.css('.gs_btnPL'))
+  let icon = await driver.findElement(By.css('.gs_ico_nav_previous'))
+  return (await text.isDisplayed()) ? text : icon
+}
+
 // Checks page number and changes page if necessary
 // TODO: Refactor away the while loop in favor of recursion.
-async function gotoPage (driver, page) {
+async function gotoPage (driver, expectedPage) {
   await captcha(driver, RESULTS)
-  let gpage = await pageNum(driver)
-  console.log(`Robot: At page ${gpage} while expecting ${page}`)
-  while (gpage != page) {
-    let css = gpage < page ? '.gs_btnPR' :  '.gs_btnPL'
-    let dir = gpage < page ? 'next' : 'previous'
-    console.log(`Robot: Moving to ${dir} page.`)
-    try {
-      let btn = await driver.findElement(By.css(css))
-    } catch (_) {
-      console.log(`Robot: Cannot find button to go to ${dir} page.`)
-      console.log('Robot: Assuming no more results.')
-      return false
-    }
-    // Due to responsive design the button above might not always be visible,
-    // so if we fail when clicking, we must try another button
-    try {
+  let actualPage = await pageNum(driver)
+  console.log(`Robot: At page ${actualPage} while expecting ${expectedPage}`)
+  while (actualPage != expectedPage) {
+    if (await hasMoreResults(driver)) {
+      let dir = expectedPage > actualPage ? 'next' : 'previous'
+      console.log(`Robot: Finding button to move to ${dir} page.`)
+      const btn = expectedPage > actualPage ?
+        await nextPageButton(driver) :
+        await prevPageButton(driver)
+      console.log('Robot: Clicking button.')
       await btn.click()
-    } catch (_) {
-      css = gpage < page ? '.gs_ico_nav_next' : '.gs_ico_nav_previous'
-      btn = await driver.findElement(By.css(css))
-      await btn.click()
+      await throttle()
+      await captcha(driver, RESULTS)
+      actualPage = await pageNum(driver)
+      console.log(`Robot: At page ${actualPage} while expecting ${expectedPage}`)
     }
-    await throttle()
-    await captcha(driver, RESULTS)
-    gpage = await pageNum(driver)
-    console.log(`Robot: At page ${gpage} while expecting ${page}`)
   }
   return true
 }

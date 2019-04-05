@@ -44,8 +44,9 @@ async function index () {
       require('./src/cmd/inspect')
       return
 
-    case 'export':
-      require('./src/cmd/export')
+    case 'ls':
+    case 'list':
+      require('./src/cmd/list')
       return
 
     case '--help':
@@ -78,8 +79,8 @@ lit browse [<args>]
   --tag   Tag mode.
   --save  Save changes whenever prompted.
 
-lit export [<args>]
-  Print list of documents to standard out.
+lit list [<args>]
+  Print list of documents to standard out. Alias: 'ls'.
   --untagged     Only untagged.
   --only=<tag>   Matching tag.
   --skip=<tag>   Not matching tag.

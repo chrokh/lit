@@ -46,8 +46,13 @@ interact with the robot to deal with CAPTCHAs.
 
     for (let query of remainingQs) {
 
-      // for consistency
-      const docId = hit => md5(hit.url + hit.title)
+      // Use cluster url as id if available, otherwise use title + author.
+      // Main external url cannot be used since parameters can vary and
+      // determining which parameters are critical is non-trivial.
+      const docId = hit => md5(
+        hit.clusterUrl ?
+        hit.clusterUrl.match(/(.*?)(\?|$)/)[1] :
+        hit.title + hit.author)
 
       // Build sweep record
       const sweepId = md5(query.id + new Date().toJSON())

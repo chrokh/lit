@@ -58,44 +58,36 @@ async function index () {
     case undefined:
       console.log(`Usage: lit <command>
 
-lit init
-  Initialize new review in current dir.
+lit init               Initialize new review in current dir.
 
-lit status
-  Show information about current lit review.
+lit status             Show information about current lit review.
 
-lit feed [file]
-  Feed current review with phrase sets.
-  [file]  JSON formatted list of list of strings.
+lit feed [file]        Feed current review with phrase sets.
+  [file]                 JSON formatted list of list of strings.
 
-lit expand
-  Expand phrase sets into queries.
+lit expand             Expand phrase sets into queries.
 
-lit collect [<args>]
-  Execute queries and collect results.
-  --limit=N  Number of queries to execute.
+lit collect [<flags>]  Execute queries and collect results.
+  --limit=N              Number of queries to execute.
 
-lit add <tags>
-  <tag>  Tags to add. Separate with spaces.
+lit add <tags>         Add tags to list of available tags.
+  <tag>                  Tags to add. Separate with spaces.
 
-lit browse [<args>]
-  Browse and tag documents.
-  --tag          Tag mode.
-  --save         Save changes whenever prompted.
-  --untagged     Only untagged.
-  --tagged       Only tagged.
-  --only=<tag>   Matching tag.
-  --skip=<tag>   Not matching tag.
+lit browse [<flags>]   Browse and tag documents.
+  --tag                  Tag mode.
+  --save                 Save changes whenever prompted.
+  --untagged             Only untagged.
+  --tagged               Only tagged.
+  --only=<tag>           Matching tag.
+  --skip=<tag>           Not matching tag.
 
-lit list [<args>]
-  Print list of documents to standard out. Alias: 'ls'.
-  --untagged     Only untagged.
-  --tagged       Only tagged.
-  --only=<tag>   Matching tag.
-  --skip=<tag>   Not matching tag.
+lit list [<flags>]     Print list of documents to standard out. Alias: 'ls'.
+  --untagged             Only untagged.
+  --tagged               Only tagged.
+  --only=<tag>           Matching tag.
+  --skip=<tag>           Not matching tag.
 
-lit show <id>
-  Show document with id.`)
+lit show <id>          Show document with id.`)
       return
 
 default:

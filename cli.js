@@ -82,6 +82,7 @@ lit browse [<args>]
 lit list [<args>]
   Print list of documents to standard out. Alias: 'ls'.
   --untagged     Only untagged.
+  --tagged       Only tagged.
   --only=<tag>   Matching tag.
   --skip=<tag>   Not matching tag.
   --format=json  Format output as JSON.`)

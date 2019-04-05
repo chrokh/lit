@@ -36,6 +36,7 @@ const documentTags = docId => {
 
 // Filter functions / predicates
 const isUntagged = doc => documentTags(doc.id).length == 0
+const isTagged = doc => documentTags(doc.id).length > 0
 // TODO: Replace hasTag with boolean algebra based match string.
 // E.g: relevant|(review&important)
 const hasTag = tag => doc =>
@@ -46,6 +47,7 @@ const hasTag = tag => doc =>
 // Single filter function
 const filterer = pipe(
   filter(OPTS.untagged ? isUntagged : k(true)),
+  filter(OPTS.tagged ? isTagged : k(true)),
   filter(OPTS.only ? hasTag(OPTS.only) : k(true)),
   filter(OPTS.skip ? not(hasTag(OPTS.skip)) : k(true)),
 )

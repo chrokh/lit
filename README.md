@@ -8,6 +8,7 @@ Lit is under heavy development. Do **not** use Lit for anything mission critical
 
 Lit is not for novice computer users.
 
+
 ## Why?
 
 Lit can help you:
@@ -16,9 +17,7 @@ Lit can help you:
 3. Non-destructively remove duplicate results.
 4. Tag articles.
 
-We're working on also being able to:
-- Export subsets in BibTeX format.
-- Generate statistics (e.g. relevant articles per keyword).
+We're also working on exporting collected references in BibTeX format.
 
 
 ## Dependencies

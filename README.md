@@ -74,6 +74,44 @@ lit show <id>          Show document with id.
 ```
 
 
+## Example
+
+This is an example of how a literature review could be carried out. All `lit` commands used below do yield output (and some are interactive) but for the sake of brevitey output is not shown here.
+
+```bash
+# Open a clean directory and initialize a lit review.
+lit init
+
+# Make a file containing the search phrases you want to use.
+# The file should be a JSON formatted list of lists of strings.
+echo '[["design principles", "design patterns"], ["oop", "object-oriented programming"]]' > input.json
+
+# Let's feed the search phrases into our lit review.
+lit feed input.json
+
+# Let's expand the phrases into search queries.
+lit expand
+
+# Collect referenes for as many queries as you'd like.
+lit collect --limit=1
+
+# Have a quick look at the references you've collected.
+lit ls
+
+# Add whatever tags you'll use in your review.
+lit add relevant irrelevant
+
+# Enter the streamlined tagging/reviewing workflow.
+lit browse --tag --save
+
+# If you exit the tagging you can resume later using:
+lit browse --tag --save --untagged
+
+# Explore the references you've marked as (e.g.) relevant at any time.
+lit browse --only=relevant
+```
+
+
 ## Contributing
 
 Lit is very specialized tool so while issue reports and pull requests are truly very appreciated, not all proposals will be accepted. Our principles are as follows:

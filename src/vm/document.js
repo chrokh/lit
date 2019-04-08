@@ -4,11 +4,6 @@ const { all } = require('../entity')
 function print (doc) {
   const { title, excerpt, author, fullTextLinks } = expandDocument(doc)
 
-  // Extract full text links but filter out google scholar links as they are
-  // stateful and will not work outside of their original context.
-  const links = (fullTextLinks).
-    filter(link => link.url.indexOf('scholar?output') == -1)
-
   // Make divider lines
   const smDivider = '-'.repeat(60)
   const lgDivider = '='.repeat(60)
@@ -19,8 +14,12 @@ function print (doc) {
   console.log(chalk.red.bold(title))
   console.log(chalk.blue(author))
   console.log(excerpt)
-  if (links) {
-    console.log()
+
+  // Extract full text links but filter out google scholar links as they are
+  // stateful and will not work outside of their original context.
+  if (fullTextLinks.length > 0) {
+    const links = fullTextLinks.
+      filter(link => link.url.indexOf('scholar?output') == -1)
     for (let link of links)
       console.log(chalk.grey('* %s'), link.url)
   }
@@ -30,7 +29,7 @@ function expandDocument (doc) {
   const observations = Object.values(all('observation'))
   const matches = observations.filter(ob => ob.documentId == doc.id)
   const { title, excerpt, author, fullTextLinks } = matches[0] // TODO: consolidate
-  return { ...doc, title, excerpt, author, fullTextLinks }
+  return { ...doc, title, excerpt, author, fullTextLinks: fullTextLinks || [] }
 }
 
 module.exports = {

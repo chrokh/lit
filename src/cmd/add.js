@@ -2,6 +2,7 @@ const prompt = require('../prompt')
 const { all, setAll } = require('../entity')
 const { merge, k, pipe, map, filter } = require('../base')
 const { toRecords } = require('../keyify')
+const { md5 } = require('../keyify')
 
 // Read supplied tags
 const TAGS = [...process.argv.slice(3)].map(x => x.trim())
@@ -24,7 +25,7 @@ const isNew = neue =>
 // Make tags from supplied arguments
 const newTags = pipe(
   filter(isNew),
-  map(tag => ({ id: tag, name: tag })),
+  map(tag => ({ id: md5(tag), name: tag })),
   toRecords
 )(TAGS)
 

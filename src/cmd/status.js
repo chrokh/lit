@@ -51,11 +51,10 @@ if (len(documents) == 0) {
 }
 const percentageComplete = Math.round(comQs.length / len(queries) * 100)
 const totQs = len(queries)
-console.log('Collection status:')
-console.log(`  ${comQs.length} queries of ${totQs} completed (${percentageComplete} %)`)
-console.log(`  ${len(documents)} unique documents (${len(observations)} hits)`)
+console.log(`${comQs.length} queries of ${totQs} completed (${percentageComplete} %).`)
+console.log(`${len(documents)} unique documents (${len(observations)} hits).`)
 if (totQs != comQs) {
-  console.log('    (use "lit collect" to resume document collection)')
+  console.log('  (use "lit collect" to resume document collection)')
 }
 
 

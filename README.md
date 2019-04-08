@@ -33,7 +33,9 @@ To avoid issues, I humbly remind you to prefer installing software using your pl
 
 ## Installation
 
-Coming soon. Will distributed as `npm` package.
+```bash
+npm install -g lit-review
+```
 
 
 ## Usage

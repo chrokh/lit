@@ -105,10 +105,13 @@ async function collectCitationHit(hit) {
 
 async function collectNormalHit(hit) {
   await captcha(hit.getDriver(), RESULTS)
-  return {
-    title:   (await hit.findElement(By.css('h3 a')).getText()),
-    url:     (await hit.findElement(By.css('h3 a')).getAttribute('href')),
-    excerpt: (await hit.findElement(By.css('.gs_rs')).getText()),
+  const title = await hit.findElement(By.css('h3 a')).getText()
+  const url = await hit.findElement(By.css('h3 a')).getAttribute('href')
+  try {
+    const excerpt = await hit.findElement(By.css('.gs_rs')).getText()
+    return { title, url, excerpt }
+  } catch (e) {
+    return { title, url }
   }
 }
 

@@ -13,7 +13,8 @@ function print (doc) {
   console.log()
   console.log(chalk.red.bold(title))
   console.log(chalk.blue(author))
-  console.log(excerpt)
+  if (excerpt)
+    console.log(excerpt)
 
   // Extract full text links but filter out google scholar links as they are
   // stateful and will not work outside of their original context.
